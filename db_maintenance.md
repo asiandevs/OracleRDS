@@ -361,8 +361,8 @@ BEGIN
   rdsadmin.rdsadmin_rman_util.backup_archivelog_date(
     p_owner                 => 'SYS',
     p_directory_name  => 'BKP_DIR',
-    p_from_date           => '01/15/2020 00:00:00',
-    p_to_date                => '01/16/2020 00:00:00',
+    p_from_date           => '01/15/2025 00:00:00',
+    p_to_date                => '01/16/2025 00:00:00',
     --p_parallel                => 4,              -- To be hashed if running a Standard Edition
     p_rman_to_dbms_output => TRUE);
 END;
