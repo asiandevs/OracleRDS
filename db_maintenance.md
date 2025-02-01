@@ -47,11 +47,30 @@ SELECT logins FROM v$instance;
 ```sql
 EXEC rdsadmin.rdsadmin_util.restricted_session(p_enable => false);
 ```
-
+### Kill a Sessions
+```sql
+begin
+rdsadmin.rdsadmin_util.kill( sid => sid, serial => serial_number);
+end;
+/
+```
+### Kill session - immediately (kill the process). [overriding the value IMMEDIATE in 3rd parameter with value PROCESS]:
+```sql
+begin
+rdsadmin.rdsadmin_util.kill( sid => sid, serial => serial_number, method => PROCESS);
+end;
+/
+```
 ---
 
 ## Users Management
 
+### grant select on sys objects to users:
+```sql
+begin
+rdsadmin.rdsadmin_util.grant_sys_object( p_obj_name => ‘V_$SESSION', p_grantee => 'USERNAME', p_privilege => 'SELECT');
+end; /
+```
 ### Grant Permission on SYS Tables/Views
 ```sql
 EXEC rdsadmin.rdsadmin_util.grant_sys_object(p_obj_name  => 'V_$SESSION', p_grantee => 'USER1', p_privilege => 'SELECT', p_grant_option => true);
@@ -423,8 +442,32 @@ EXEC rdsadmin.rdsadmin_rman_util.enable_block_change_tracking;
 ```sql
 EXEC rdsadmin.rdsadmin_rman_util.disable_block_change_tracking;
 ```
-
-#### Crosscheck and delete expired ARCHIVELOGS:
+### To see archive log file retention:
+```sql
+set serveroutput on;
+exec rdsadmin.rdsadmin_util.show_configuration;
+```
+## To keep logs for a longer period of time for a replication process:
+```sql
+exec rdsadmin.rdsadmin_util.set_configuration(‘archivelog retention hours’,48);
+```
+### To see expired logs and their delete status:
+```sql
+select trunc(completion_time,’DD’), deleted, count(*)
+from v$archived_log
+group by trunc(completion_time,’DD’), deleted
+order by 1 desc;
+```
+### To delete expired archive logs, set the first flag to true:
+```sql
+BEGIN
+rdsadmin.rdsadmin_rman_util.crosscheck_archivelog(
+p_delete_expired => TRUE,
+p_rman_to_dbms_output => FALSE);
+END;
+/
+```
+### Crosscheck and delete expired ARCHIVELOGS:
 
 ```sql
 EXEC rdsadmin.rdsadmin_rman_util.crosscheck_archivelog(p_delete_expired => TRUE, p_rman_to_dbms_output => TRUE);
