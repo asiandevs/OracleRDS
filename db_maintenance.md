@@ -15,10 +15,10 @@ Run the following SQL command in your Oracle RDS instance using a SQL client lik
 ```sql
 exec rdsadmin.rdsadmin_util.rename_global_name(p_new_global_name => 'NEWDB');
 ```
+---
+### Sessions Management
 
-## Sessions Management
-
-### Check Active Sessions
+#### Check Active Sessions
 ```sql
 SELECT substr(s.INST_ID || '|' || s.USERNAME || '| ' || s.sid || ',' || s.serial# || ' |' || substr(s.MACHINE,1,22) || '|' || substr(s.MODULE,1,18),1,69) AS "INS|USER|SID,SER|MACHIN|MODUL",
        substr(s.status || '|' || round(w.WAIT_TIME_MICRO / 1000000) || '|' || LAST_CALL_ET || '|' || to_char(LOGON_TIME,'ddMon HH24:MI'),1,40) AS "ST|WAITD|ACT_SINC|LOGIN",
@@ -31,40 +31,36 @@ AND    s.sid = w.sid
 AND    s.STATUS = 'ACTIVE'
 ORDER BY "I|BLK_BY" DESC, w.event, "INS|USER|SID,SER|MACHIN|MODUL", "ST|WAITD|ACT_SINC|LOGIN" DESC, "CURRENT SQL|REMIN_SEC";
 ```
-
-### Disconnect a Session
+#### Disconnect a Session
 ```sql
 EXEC rdsadmin.rdsadmin_util.disconnect(<SID>, <SERIAL#>, 'IMMEDIATE');
 ```
-
-### Cancel Statement
+#### Cancel Statement
 ```sql
 EXEC rdsadmin.rdsadmin_util.cancel(<SID>, <SERIAL#>, '<SQLID>');
 ```
-
-### Enable Restricted Sessions
+#### Enable Restricted Sessions
 ```sql
 EXEC rdsadmin.rdsadmin_util.restricted_session(p_enable => true);
 ```
 ```sql
 SELECT logins FROM v$instance;
 ```
-
-### Disable Restricted Sessions
+#### Disable Restricted Sessions
 ```sql
 EXEC rdsadmin.rdsadmin_util.restricted_session(p_enable => false);
 ```
 ```sql
 SELECT logins FROM v$instance;
 ```
-### Kill a Sessions
+#### Kill a Sessions
 ```sql
 begin
 rdsadmin.rdsadmin_util.kill( sid => sid, serial => serial_number);
 end;
 /
 ```
-### Kill session - immediately (kill the process). [overriding the value IMMEDIATE in 3rd parameter with value PROCESS]:
+#### Kill session - immediately (kill the process). [overriding the value IMMEDIATE in 3rd parameter with value PROCESS]:
 ```sql
 begin
 rdsadmin.rdsadmin_util.kill( sid => sid, serial => serial_number, method => PROCESS);
@@ -110,10 +106,27 @@ p_privilege => ‘SELECT‘);
 end;
 /
 ```
+### create a custom function to verify passwords by using the Amazon RDS procedure and assign:
+
+```sql
+begin
+ rdsadmin.rdsadmin_password_verify.create_verify_function(
+ p_verify_function_name => 'amity_stig_verify_function', 
+ p_min_length => 12, 
+ p_min_uppercase => 1, 
+ p_min_digits => 1, 
+ p_min_special => 1,
+ p_disallow_at_sign => true);
+end;
+/
+alter profile Default LIMIT PASSWORD_VERIFY_FUNCTION amity_stig_verify_function
+
+```
+---
 ### Tablespaces
 Amazon RDS only supports Oracle Managed Files (OMF) for data files, log files, and control files. When you create data files and log files, you can’t specify the physical file names. By default, the tablespace created is a bigfile tablespace.
 
-To create a smallfile tablespace, you need to mention the “smallfile” keyword after create in your syntax.
+#### To create a smallfile tablespace, you need to mention the “smallfile” keyword after create in your syntax.
 ```
 create smallfile tablespace janglast datafile size 100M autoextend on maxsize 1G;
 ```
@@ -130,21 +143,38 @@ alter tablespace janglast add datafile size 4g;
 ```
 drop tablespace janglast including contents and datafiles;
 
-### Set DEFAULT TABLESPACE:
+#### Set DEFAULT TABLESPACE:
 ```sql
 EXEC rdsadmin.rdsadmin_util.alter_default_tablespace(tablespace_name => 'example');
 ```
 
-### Resize TEMPORARY tablespace:
+#### Resize TEMPORARY tablespace:
 ```sql
 EXEC rdsadmin.rdsadmin_util.resize_temp_tablespace('TEMP','4G');
 ```
-
+#### Tablespace and Storage Management:
+```sql
+SELECT tablespace_name, 
+       round((tablespace_size8192)/(10241024)) Total_MB, 
+       round((used_space8192)/(10241024)) Used_MB, 
+       round(used_percent,2) "%Used" 
+FROM dba_tablespace_usage_metrics;
+```
+#### Object Management:
+```sql
+SELECT SEGMENT_NAME, 
+       TABLESPACE_NAME, 
+       SEGMENT_TYPE, 
+       ROUND(SUM(BYTES/1024/1024)) OBJECT_SIZE_MB 
+FROM SYS.DBA_SEGMENTS 
+WHERE OWNER = upper('SPRINT_STAGE1') 
+GROUP BY SEGMENT_NAME, TABLESPACE_NAME, SEGMENT_TYPE;
+```
 ---
 
-## Directory/S3 Management
+### Directory/S3 Management
 
-### Create a Directory `DATA_PUMP_DIR` Object in Oracle RDS
+#### Create a Directory `DATA_PUMP_DIR` Object in Oracle RDS
 
 ```sql
 BEGIN
@@ -155,7 +185,7 @@ BEGIN
 END;
 /
 ```
-### Upload a file to S3 bucket:
+#### Upload a file to S3 bucket:
 ```sql
 SELECT rdsadmin.rdsadmin_s3_tasks.upload_to_s3( 
     p_bucket_name => '<bucket_name>', 
@@ -166,7 +196,7 @@ AS TASK_ID
 FROM DUAL;
 ```
 
-### Download all files from an S3 bucket:
+#### Download all files from an S3 bucket:
 ```sql
 SELECT rdsadmin.rdsadmin_s3_tasks.download_from_s3( 
     p_bucket_name => 'my-bucket', 
@@ -175,7 +205,7 @@ AS TASK_ID
 FROM DUAL;
 ```
 
-### Download specific files from an S3 bucket:
+#### Download specific files from an S3 bucket:
 ```sql
 SELECT rdsadmin.rdsadmin_s3_tasks.download_from_s3( 
     p_bucket_name => 'my-bucket', 
@@ -185,7 +215,7 @@ AS TASK_ID
 FROM DUAL;
 ```
 
-### Copy the Dump File from S3 to RDS
+#### Copy the Dump File from S3 to RDS
 
 Use the `rdsadmin.rdsadmin_s3_tasks.download_from_s3` procedure to copy the dump file from S3 to the `DATA_PUMP_DIR` directory on the RDS instance:
 
@@ -200,12 +230,12 @@ END;
 /
 ```
 
-### Show All Files Under `DATA_PUMP_DIR`
+#### Show All Files Under `DATA_PUMP_DIR`
 ```sql
 SELECT * FROM TABLE(RDSADMIN.RDS_FILE_UTIL.LISTDIR('DATA_PUMP_DIR')) ORDER BY mtime;
 ```
 
-### View Logs Using `rds_file_util.read_text_file`:
+#### View Logs Using `rds_file_util.read_text_file`:
 
 To view the log file (e.g.,import_multi_file.log), use the following procedure to read it in chunks:
 
@@ -222,12 +252,12 @@ END;
 /
 ```
 
-### Read a Log File Under `BDUMP`
+#### Read a Log File Under `BDUMP`
 ```sql
 SELECT text FROM TABLE(rdsadmin.rds_file_util.read_text_file('BDUMP','dbtask-<taskid>.log'));
 ```
 
-### Delete a Directory
+#### Delete a Directory
 > **Note:** Deleting a directory will not delete the underlying files. You need to delete them manually before removing the directory.
 
 1. List all files under the directory:
@@ -249,7 +279,7 @@ EXEC rdsadmin.rdsadmin_util.drop_directory(p_directory_name => 'BKP_DIR');
 ```sql
 EXEC UTL_FILE.FRENAME('DATA_PUMP_DIR', '<Original_filename>', 'DATA_PUMP_DIR', '<New_filename>', TRUE);
 ```
-
+---
 ### Enable/Disable Force Logging:
 ```sql
 EXEC rdsadmin.rdsadmin_util.force_logging(p_enable => true );
@@ -258,7 +288,7 @@ EXEC rdsadmin.rdsadmin_util.force_logging(p_enable => true );
 EXEC rdsadmin.rdsadmin_util.force_logging(p_enable => false);
 ```
 
-### Flush Shared Pool and Buffer Cache:
+### Flush Shared Pool:
 ```sql
 EXEC rdsadmin.rdsadmin_util.flush_shared_pool;
 ```
@@ -285,13 +315,13 @@ select GROUP#,bytes/1024/1024,STATUS from v$log;
 exec rdsadmin.rdsadmin_util.drop_logfile(grp => 3);
 ```
 
-### Force a Checkpoint and Switch REDOLOG:
+### Force a Checkpoint and Switch log:
 ```sql
 EXEC rdsadmin.rdsadmin_util.checkpoint;
 ```
+```
 EXEC rdsadmin.rdsadmin_util.switch_logfile;
 ```
-
 ### View REDOLOG switches per hour:
 ```sql
 SELECT to_char(first_time,'YYYY-MON-DD') day, 
@@ -301,16 +331,31 @@ WHERE first_time > sysdate-1
 GROUP BY to_char(first_time,'YYYY-MON-DD') 
 ORDER BY 1 ASC;
 ```
-
 ### Add/Drop REDO LOG Group:
 ```sql
 EXEC rdsadmin.rdsadmin_util.add_logfile(p_size => '1G');
+```
+```
 EXEC rdsadmin.rdsadmin_util.drop_logfile(1);
 ```
 ### Checking and Updating Archive Log Retention:
 ```sql
+set serveroutput on;
 EXEC rdsadmin.rdsadmin_util.show_configuration;
+```
+```
 EXEC rdsadmin.rdsadmin_util.set_configuration(name => 'archivelog retention hours', value => '24');
+```
+#### To keep logs for a longer period of time for a replication process:
+```sql
+exec rdsadmin.rdsadmin_util.set_configuration('archivelog retention hours',48);
+```
+#### To see expired logs and their delete status:
+```sql
+select trunc(completion_time,'DD'), deleted, count(*)
+from v$archived_log
+group by trunc(completion_time,'DD'), deleted
+order by 1 desc;
 ```
 
 ### Add Supplemental Log:
@@ -318,9 +363,15 @@ EXEC rdsadmin.rdsadmin_util.set_configuration(name => 'archivelog retention hour
 EXEC rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD','ALL');
 ```
 
-### Change Database Timezone:
+### Change Database Timezone (Here setting up as Sydney):
 ```sql
-EXEC rdsadmin.rdsadmin_util.alter_db_time_zone(p_new_tz => 'Asia/Sydney');
+alter session set nls_date_format='DD-MON-YY HH24:MI:SS';
+select sysdate from dual;
+
+select systimestamp from dual;
+SELECT dbtimezone FROM DUAL;
+
+EXEC rdsadmin.rdsadmin_util.alter_db_time_zone(p_new_tz => 'Australia/Sydney');
 ```
 
 ### Gather Statistics:
@@ -340,28 +391,11 @@ END;
 ### Re-Compile invalid objects:
 ```sql
 EXEC SYS.UTL_RECOMP.recomp_parallel(4);
+```
+```
 EXECUTE SYS.UTL_RECOMP.RECOMP_SERIAL();
 ```
 
-### Tablespace and Storage Management:
-```sql
-SELECT tablespace_name, 
-       round((tablespace_size8192)/(10241024)) Total_MB, 
-       round((used_space8192)/(10241024)) Used_MB, 
-       round(used_percent,2) "%Used" 
-FROM dba_tablespace_usage_metrics;
-```
-
-### Object Management:
-```sql
-SELECT SEGMENT_NAME, 
-       TABLESPACE_NAME, 
-       SEGMENT_TYPE, 
-       ROUND(SUM(BYTES/1024/1024)) OBJECT_SIZE_MB 
-FROM SYS.DBA_SEGMENTS 
-WHERE OWNER = upper('SPRINT_STAGE1') 
-GROUP BY SEGMENT_NAME, TABLESPACE_NAME, SEGMENT_TYPE;
-```
 ### Disable the CORRUPTION SKIPPING on the corrupted object:
 
 ```sql
@@ -386,7 +420,7 @@ AND table_name = UPPER('&corrupted_object_name');
 EXEC rdsadmin.rdsadmin_dbms_repair.drop_repair_table;
 EXEC rdsadmin.rdsadmin_dbms_repair.drop_orphan_keys_table;
 ```
-
+---
 ### Auditing:
 
 #### Enable Auditing for all the privileges on SYS.AUD$ table:
@@ -401,10 +435,10 @@ EXEC rdsadmin.rdsadmin_master_util.audit_all_sys_aud_table(p_by_access => true);
 ```sql
 EXEC rdsadmin.rdsadmin_master_util.noaudit_all_sys_aud_table;
 ```
-
+---
 ### RMAN Tasks:
 
-### incremental backup of the current tenant database
+#### incremental backup of the current tenant database
 ```sql
 BEGIN
     rdsadmin.rdsadmin_rman_util.backup_tenant_incremental(
@@ -418,7 +452,7 @@ BEGIN
 END;
 /
 ```
-## backs up all archived redo logs
+#### backs up all archived redo logs
 ```sql
 BEGIN
     rdsadmin.rdsadmin_rman_util.backup_archivelog_all(
@@ -456,7 +490,9 @@ SELECT text FROM table(rdsadmin.rds_file_util.read_text_file('BDUMP','rds-rman-v
 #### Enable BLOCK CHANGE TRACKING on RDS:
 
 ```sql
-SELECT status, filename FROM V$BLOCK_CHANGE_TRACKING;
+COL STATUS   FORMAT A8
+COL FILENAME FORMAT A60
+SELECT STATUS, FILENAME FROM V$BLOCK_CHANGE_TRACKING;
 ```
 ```
 EXEC rdsadmin.rdsadmin_rman_util.enable_block_change_tracking;
@@ -467,23 +503,7 @@ EXEC rdsadmin.rdsadmin_rman_util.enable_block_change_tracking;
 ```sql
 EXEC rdsadmin.rdsadmin_rman_util.disable_block_change_tracking;
 ```
-### To see archive log file retention:
-```sql
-set serveroutput on;
-exec rdsadmin.rdsadmin_util.show_configuration;
-```
-## To keep logs for a longer period of time for a replication process:
-```sql
-exec rdsadmin.rdsadmin_util.set_configuration(‘archivelog retention hours’,48);
-```
-### To see expired logs and their delete status:
-```sql
-select trunc(completion_time,’DD’), deleted, count(*)
-from v$archived_log
-group by trunc(completion_time,’DD’), deleted
-order by 1 desc;
-```
-### To delete expired archive logs, set the first flag to true:
+#### To delete expired archive logs, set the first flag to true:
 ```sql
 BEGIN
 rdsadmin.rdsadmin_rman_util.crosscheck_archivelog(
@@ -492,12 +512,13 @@ p_rman_to_dbms_output => FALSE);
 END;
 /
 ```
-### Crosscheck and delete expired ARCHIVELOGS:
+#### Crosscheck and delete expired ARCHIVELOGS:
 
 ```sql
 EXEC rdsadmin.rdsadmin_rman_util.crosscheck_archivelog(p_delete_expired => TRUE, p_rman_to_dbms_output => TRUE);
 ```
 
+---
 ### Oracle Scheduler Jobs Management:
 
 #### List all jobs:
@@ -562,20 +583,4 @@ BEGIN
     attribute => 'repeat_interval',
     value     => 'freq=daily;byday=FRI,SAT;byhour=20;byminute=0;bysecond=0');
 END;
-```
-#### create a custom function to verify passwords by using the Amazon RDS procedure and assign:
-
-```sql
-begin
- rdsadmin.rdsadmin_password_verify.create_verify_function(
- p_verify_function_name => 'amity_stig_verify_function', 
- p_min_length => 12, 
- p_min_uppercase => 1, 
- p_min_digits => 1, 
- p_min_special => 1,
- p_disallow_at_sign => true);
-end;
-/
-alter profile Default LIMIT PASSWORD_VERIFY_FUNCTION amity_stig_verify_function
-
 ```
