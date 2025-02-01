@@ -362,10 +362,6 @@ FROM SYS.DBA_SEGMENTS
 WHERE OWNER = upper('SPRINT_STAGE1') 
 GROUP BY SEGMENT_NAME, TABLESPACE_NAME, SEGMENT_TYPE;
 ```
-```
-
-Let me know if you need further adjustments!
-```markdown
 ### Disable the CORRUPTION SKIPPING on the corrupted object:
 
 ```sql
@@ -408,95 +404,61 @@ EXEC rdsadmin.rdsadmin_master_util.noaudit_all_sys_aud_table;
 
 ### RMAN Tasks:
 
-#### Full RMAN database Backup in RDS:
-
+### incremental backup of the current tenant database
 ```sql
 BEGIN
-  rdsadmin.rdsadmin_rman_util.backup_database_full(
-    p_owner               => 'SYS',
-    p_directory_name      => 'BKP_DIR',
-    p_level               => 0,               -- 0 For FULL, 1 for Incremental
-    --p_parallel            => 4,              -- To be hashed if using a Standard Edition
-    p_section_size_mb     => 10,
-    p_rman_to_dbms_output => TRUE);
+    rdsadmin.rdsadmin_rman_util.backup_tenant_incremental(
+        p_owner               => 'SYS', 
+        p_directory_name      => 'DATATRN',
+        p_level               => 1,
+        p_parallel            => 2,  
+        p_section_size_mb     => 10,
+        p_tag                 => 'MY_INCREMENTAL_BACKUP',
+        p_rman_to_dbms_output => FALSE);
 END;
 /
 ```
-
-#### Backup ALL ARCHIVELOGS:
-
+## backs up all archived redo logs
 ```sql
 BEGIN
-  rdsadmin.rdsadmin_rman_util.backup_archivelog_all(
-    p_owner                     => 'SYS',
-    p_directory_name      => 'BKP_DIR',
-    --p_parallel                   => 6,              -- To be hashed if using a Standard Edition
-    p_rman_to_dbms_output => TRUE);
+    rdsadmin.rdsadmin_rman_util.backup_archivelog_all(
+        p_owner               => 'SYS', 
+        p_directory_name      => 'DATATRN',
+        p_parallel            => 2, 
+        p_tag                 => 'LOG_BACKUP_EAYM',
+        p_rman_to_dbms_output => FALSE);
 END;
 /
-```
-
-#### Backup ARCHIVELOGS between a date range:
-
-```sql
-BEGIN
-  rdsadmin.rdsadmin_rman_util.backup_archivelog_date(
-    p_owner                 => 'SYS',
-    p_directory_name  => 'BKP_DIR',
-    p_from_date           => '01/15/2025 00:00:00',
-    p_to_date                => '01/16/2025 00:00:00',
-    --p_parallel                => 4,              -- To be hashed if running a Standard Edition
-    p_rman_to_dbms_output => TRUE);
-END;
-/
-```
-
-*Note: In case of using SCN/sequence replace "p_from_date" with "p_from_scn" or "p_from_sequence" and "p_to_date" with "p_to_scn" or "p_to_sequence".*
-
-#### Show Running RMAN Backups:
-
-```sql
-SELECT to_char (start_time,'DD-MON-YY HH24:MI') START_TIME, 
-       to_char(end_time,'DD-MON-YY HH24:MI') END_TIME, 
-       time_taken_display, status, 
-       input_type, output_device_type,
-       input_bytes_display, output_bytes_display, 
-       output_bytes_per_sec_display,
-       COMPRESSION_RATIO COMPRESS_RATIO
-FROM v$rman_backup_job_details
-WHERE status like 'RUNNING%';
-```
-
-#### Show current Running Hot Backups:
-
-```sql
-SELECT t.name AS "TB_NAME", 
-       d.file# as "DF#", 
-       d.name AS "DF_NAME", 
-       b.status
-FROM V$DATAFILE d, V$TABLESPACE t, V$BACKUP b
-WHERE d.TS#=t.TS#
-AND b.FILE#=d.FILE#
-AND b.STATUS='ACTIVE';
 ```
 
 #### Validate the database for Physical/Logical corruption on RDS:
 
 ```sql
 BEGIN
-  rdsadmin.rdsadmin_rman_util.validate_database(
-    p_validation_type     => 'PHYSICAL+LOGICAL', 
-    --p_parallel                  => 2,              -- To be hashed if running a Standard Edition
-    p_section_size_mb     => 10,
-    p_rman_to_dbms_output => TRUE);
+    rdsadmin.rdsadmin_rman_util.validate_tenant(
+        p_validation_type     => 'PHYSICAL+LOGICAL', 
+        p_parallel            => 4,  
+        p_section_size_mb     => 10,
+        p_rman_to_dbms_output => FALSE);
 END;
 /
 ```
+p_rman_to_dbms_output parameter is set to FALSE, the RMAN output is written to a file in the BDUMP directory.
+
+```sql
+SELECT * FROM table(rdsadmin.rds_file_util.listdir('BDUMP')) where filename like '%rds-rman%' ;  
+```
+To view the files in the BDUMP directory, run the following SELECT statement.
+```sql
+SELECT text FROM table(rdsadmin.rds_file_util.read_text_file('BDUMP','rds-rman-validate-DATABASE-2025-02-01.22-09-52.150775000.txt'));
+ ```           
 
 #### Enable BLOCK CHANGE TRACKING on RDS:
 
 ```sql
 SELECT status, filename FROM V$BLOCK_CHANGE_TRACKING;
+```
+```
 EXEC rdsadmin.rdsadmin_rman_util.enable_block_change_tracking;
 ```
 
