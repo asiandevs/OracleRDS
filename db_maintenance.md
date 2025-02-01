@@ -10,6 +10,11 @@ In Amazon RDS, you are not allowed to execute the following commands:
 This is because AWS manages the RDS instance and restricts access to these commands. Instead, AWS provides packages under the `rdsadmin` schema to help you perform common DBA tasks without needing to execute the above commands.
 Run the following SQL command in your Oracle RDS instance using a SQL client like SQL*Plus or SQL Developer or EC2.
 
+### Database Name
+
+```sql
+exec rdsadmin.rdsadmin_util.rename_global_name(p_new_global_name => 'NEWDB');
+```
 
 ## Sessions Management
 
@@ -40,12 +45,17 @@ EXEC rdsadmin.rdsadmin_util.cancel(<SID>, <SERIAL#>, '<SQLID>');
 ### Enable Restricted Sessions
 ```sql
 EXEC rdsadmin.rdsadmin_util.restricted_session(p_enable => true);
+```
+```sql
 SELECT logins FROM v$instance;
 ```
 
 ### Disable Restricted Sessions
 ```sql
 EXEC rdsadmin.rdsadmin_util.restricted_session(p_enable => false);
+```
+```sql
+SELECT logins FROM v$instance;
 ```
 ### Kill a Sessions
 ```sql
@@ -71,7 +81,7 @@ begin
 rdsadmin.rdsadmin_util.grant_sys_object( p_obj_name => ‘V_$SESSION', p_grantee => 'USERNAME', p_privilege => 'SELECT');
 end; /
 ```
-### Grant Permission on SYS Tables/Views
+### Grant Permission on SYS Tables/Views with the grant option
 ```sql
 EXEC rdsadmin.rdsadmin_util.grant_sys_object(p_obj_name  => 'V_$SESSION', p_grantee => 'USER1', p_privilege => 'SELECT', p_grant_option => true);
 ```
@@ -89,6 +99,45 @@ GRANT SELECT_CATALOG_ROLE TO user1;
 ### Grant EXECUTE on Dictionary
 ```sql
 GRANT EXECUTE_CATALOG_ROLE TO user1;
+```
+### Revoking SELECT or EXECUTE Privileges on SYS Objects:
+```sql
+begin
+rdsadmin.rdsadmin_util.revoke_sys_object(
+p_obj_name => ‘V_$SESSION‘,
+p_revokee => ‘USER1‘,
+p_privilege => ‘SELECT‘);
+end;
+/
+```
+### Tablespaces
+Amazon RDS only supports Oracle Managed Files (OMF) for data files, log files, and control files. When you create data files and log files, you can’t specify the physical file names. By default, the tablespace created is a bigfile tablespace.
+
+To create a smallfile tablespace, you need to mention the “smallfile” keyword after create in your syntax.
+```
+create smallfile tablespace janglast datafile size 100M autoextend on maxsize 1G;
+```
+```
+create smallfile temporary tablespace tempsmall01;
+```
+
+Better not to use smallfile tablespaces as no option resize smallfile tablespaces with Amazon RDS for Oracle but to add a datafile to a smallfile tablespace.
+```
+alter tablespace janglast resize 4g;
+```
+```
+alter tablespace janglast add datafile size 4g;
+```
+drop tablespace janglast including contents and datafiles;
+
+### Set DEFAULT TABLESPACE:
+```sql
+EXEC rdsadmin.rdsadmin_util.alter_default_tablespace(tablespace_name => 'example');
+```
+
+### Resize TEMPORARY tablespace:
+```sql
+EXEC rdsadmin.rdsadmin_util.resize_temp_tablespace('TEMP','4G');
 ```
 
 ---
@@ -204,18 +253,42 @@ EXEC UTL_FILE.FRENAME('DATA_PUMP_DIR', '<Original_filename>', 'DATA_PUMP_DIR', '
 ### Enable/Disable Force Logging:
 ```sql
 EXEC rdsadmin.rdsadmin_util.force_logging(p_enable => true );
+```
+```
 EXEC rdsadmin.rdsadmin_util.force_logging(p_enable => false);
 ```
 
 ### Flush Shared Pool and Buffer Cache:
 ```sql
 EXEC rdsadmin.rdsadmin_util.flush_shared_pool;
+```
+### Flush Buffer Cache:
+```sql
 EXEC rdsadmin.rdsadmin_util.flush_buffer_cache;
+```
+### Purge Recyclebin:
+```sql
+exec rdsadmin.rdsadmin_util.purge_dba_recyclebin;
+```
+### Logfile group management
+Adding Online Redo Logs An Amazon RDS DB instance running Oracle starts with four online redo logs, 128 MB each. here 500M and '3' example only
+Drop each inactive log using the group number. For that do log switch and check point and then delete and recreate with right sizing.
+
+To add additional redo logs, use the Amazon RDS procedure rdsadmin.rdsadmin_util.add_logfile.
+```
+exec rdsadmin.rdsadmin_util.add_logfile(p_size => '500M');
+```
+```
+select GROUP#,bytes/1024/1024,STATUS from v$log;
+```
+```
+exec rdsadmin.rdsadmin_util.drop_logfile(grp => 3);
 ```
 
 ### Force a Checkpoint and Switch REDOLOG:
 ```sql
 EXEC rdsadmin.rdsadmin_util.checkpoint;
+```
 EXEC rdsadmin.rdsadmin_util.switch_logfile;
 ```
 
@@ -248,16 +321,6 @@ EXEC rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD','ALL');
 ### Change Database Timezone:
 ```sql
 EXEC rdsadmin.rdsadmin_util.alter_db_time_zone(p_new_tz => 'Asia/Sydney');
-```
-
-### Set DEFAULT TABLESPACE:
-```sql
-EXEC rdsadmin.rdsadmin_util.alter_default_tablespace(tablespace_name => 'example');
-```
-
-### Resize TEMPORARY tablespace:
-```sql
-EXEC rdsadmin.rdsadmin_util.resize_temp_tablespace('TEMP','4G');
 ```
 
 ### Gather Statistics:
@@ -538,4 +601,19 @@ BEGIN
     value     => 'freq=daily;byday=FRI,SAT;byhour=20;byminute=0;bysecond=0');
 END;
 ```
+#### create a custom function to verify passwords by using the Amazon RDS procedure and assign:
+
+```sql
+begin
+ rdsadmin.rdsadmin_password_verify.create_verify_function(
+ p_verify_function_name => 'amity_stig_verify_function', 
+ p_min_length => 12, 
+ p_min_uppercase => 1, 
+ p_min_digits => 1, 
+ p_min_special => 1,
+ p_disallow_at_sign => true);
+end;
+/
+alter profile Default LIMIT PASSWORD_VERIFY_FUNCTION amity_stig_verify_function
+
 ```
