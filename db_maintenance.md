@@ -373,6 +373,7 @@ SELECT dbtimezone FROM DUAL;
 
 EXEC rdsadmin.rdsadmin_util.alter_db_time_zone(p_new_tz => 'Australia/Sydney');
 ```
+Restart database to reflect the change.
 
 ### Gather Statistics:
 ```sql
