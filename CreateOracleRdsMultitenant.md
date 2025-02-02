@@ -28,66 +28,40 @@ Note: e.g., Select the patched version**Version 21c**.To see the 21c versions, m
 ---
 
 ### **Step 2: Create a Pluggable Database (PDB)**
-Once the RDS instance is running, connect using **SQL*Plus** or any SQL client (SQLcl, SQL Developer, etc.).
 
-#### **1. Connect to RDS as ADMIN User**
-```sql
-sqlplus admin@CDB21C
-```
+#### **1. Click to RDS (CDB)**
+#### **2. Click "Actions --> Add tenant database**
 
-#### **2. Create a Pluggable Database (PDB)**
-```sql
-BEGIN
-   DBMS_PDB.CREATE_PDB (
-      pdb_name    => 'PDB1',
-      pdb_admin   => 'pdbadmin',
-      admin_pass  => 'StrongPassword123'
-   );
-END;
-/
-```
+![image](https://github.com/user-attachments/assets/b84565ed-a7e7-458a-857b-ba80ab962d86)
+#### **3. Pass values for the Tenant database settings and Click "Add tenant**
+![image](https://github.com/user-attachments/assets/edeb9bdf-7a97-44a0-b2e0-621a8916de73)
+#### **4. It will in Creating stage and then Available stage
 Wait for the operation to complete, then open the new PDB:
+![image](https://github.com/user-attachments/assets/19178f31-2e9c-43f3-9f3e-717ed841df1d)
 
-```sql
-ALTER PLUGGABLE DATABASE PDB1 OPEN;
-```
-
-To verify:
-
-```sql
-SELECT PDB_NAME, STATUS FROM DBA_PDBS;
-```
+![image](https://github.com/user-attachments/assets/9ae58744-7089-43c3-ab27-1a87baa229e8)
 
 ---
 
-### **Step 3: Drop the Second Tenant Database**
-If you have a second tenant (e.g., `PDB2`) and want to drop it:
+### **Step 3: Drop Tenant Database**
+For a multitenant architecture, one tenant database must be present.
 
-#### **1. Close the PDB**
-```sql
-ALTER PLUGGABLE DATABASE PDB2 CLOSE IMMEDIATE;
-```
+If you have a second tenant (e.g., `MALOTI`) and want to drop it:
+#### **1. Click to RDS (PDB)**
+#### **2. Click "Actions --> Delete**
+![image](https://github.com/user-attachments/assets/b3d710c3-d584-4926-8a8f-c84ed62875c4)
 
-#### **2. Unplug the PDB**
-```sql
-ALTER PLUGGABLE DATABASE PDB2 UNPLUG INTO '/opt/oracle/pdb2.xml';
-```
+Take a backup if required [Tick --> Create final snapshot?], and then type delete me into the field and click delete
+![image](https://github.com/user-attachments/assets/f664293d-ac6e-4362-a575-8118c6bb0b08)
 
-#### **3. Drop the PDB**
-```sql
-DROP PLUGGABLE DATABASE PDB2 INCLUDING DATAFILES;
-```
+For CDB delete, you need to select CDB and proceed on that
+![image](https://github.com/user-attachments/assets/0369a17d-33e3-4239-a663-1f87d9514f16)
 
-To verify:
-
-```sql
-SELECT PDB_NAME FROM DBA_PDBS;
-```
 
 ---
 
 ### **Summary**
 - Created an **Oracle RDS 21c Multitenant** Database (CDB).
-- Added a **Pluggable Database (PDB1)**.
-- Dropped a **Second Pluggable Database (PDB2)**.
+- Added a **Pluggable Database (MALOTI)**.
+- Dropped a **Second Pluggable Database (MALOTI)**.
 
