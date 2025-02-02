@@ -16,11 +16,16 @@ A parameter group allows you to configure database settings for your Oracle RDS 
 3. Click **Create parameter group**.
    ![image](https://github.com/user-attachments/assets/86126221-1c4f-4eca-846a-47ed81856063)
 4. Enter a **Name** and **Description**.
-5. Select **oracle-ee, oracle-se2, oracle-se1, or oracle-se** as the Engine type.
+5. Select **oracle-ee, oracle-ee-cdb, oracle-se2, or oracle-se2-cdb** as the Engine type.
 6. Select **oracle-ee-cdb-19, oracle-ee-cdb-21** as the parameter group family.
 7. Click **Create**.
-9. Select the newly created parameter group and click **Edit parameters**.
-10. Modify the necessary parameters and click **Save changes**.
+![image](https://github.com/user-attachments/assets/e394bef1-f34e-4cb4-a812-edd3b25d4f1b)
+
+8. Select the newly created parameter group and click **Edit parameters**.
+![image](https://github.com/user-attachments/assets/17e92eaa-7a51-446a-932d-2d6d02a25954)
+
+9. Modify the necessary parameters and click **Save changes**.
+![image](https://github.com/user-attachments/assets/f2a1ed31-bd0c-47ee-ad9e-2e02d0d71d7f)
 
 ### Using AWS CLI
 ```sh
@@ -44,12 +49,16 @@ An option group allows you to enable additional features like Oracle TDE or OEM.
 1. Navigate to the **Amazon RDS** console.
 2. Click **Option groups** in the left-hand menu.
 3. Click **Create group**.
+![image](https://github.com/user-attachments/assets/d45631cb-b047-46e3-a6d7-39672dc8117d)
+
 4. Enter a **Name** and **Description**.
-5. Select **Oracle** as the engine and choose the correct version.
-6. Click **Create**.
-7. Select the newly created option group and click **Add option**.
-8. Select an option (e.g., Oracle TDE) and configure its settings.
-9. Click **Add option**.
+5. Select ****oracle-ee, oracle-ee-cdb, oracle-se2, or oracle-se2-cdb** as the Engine type.** as the engine
+6. Select Major Engine Version and choose the correct version **19 or 21**.
+7. Click **Create**.![image](https://github.com/user-attachments/assets/54b33263-b2d6-4b64-afc5-05f6cc880a39)
+8. Select the newly created option group and click **Add option**.![image](https://github.com/user-attachments/assets/0eb59d25-9660-4973-a522-d7c2cb5a17b7)
+9. Select an option (e.g., UTL_MAIL) and configure its settings.
+10. Click **Add option**.![image](https://github.com/user-attachments/assets/e3c1081d-7178-4219-94ef-85f3213a2bd7)
+
 
 ### Using AWS CLI
 ```sh
@@ -69,6 +78,10 @@ aws rds add-option-to-option-group \
 
 ## Step 3: Associate Groups with RDS Instance
 ### Using AWS Console
+Either you can add them during database creation
+![image](https://github.com/user-attachments/assets/50d2ea52-1452-447e-b704-c08731028c78)
+
+or later you can associated after database creation
 1. Navigate to the **Amazon RDS** console.
 2. Select the Oracle RDS instance.
 3. Click **Modify**.
@@ -90,6 +103,16 @@ Some parameter changes require a reboot to take effect.
 ```sh
 aws rds reboot-db-instance --db-instance-identifier my-oracle-instance
 ```
+
+## Remove or Edit (If Required)
+1. Navigate to the custom **Parameter Group** or the custom **Option Group**.
+2. For **Parameter Group**
+
+![image](https://github.com/user-attachments/assets/372e647c-e488-4156-96a2-01da536fc364
+
+Or For **Option Group**.
+![image](https://github.com/user-attachments/assets/c1dd4a24-a24e-46f7-9bde-2930060e8012)
+
 
 ## Conclusion
 You have now successfully created and associated a custom parameter group and option group with your Oracle RDS instance. This allows fine-tuned configuration and additional features as per your requirements.
