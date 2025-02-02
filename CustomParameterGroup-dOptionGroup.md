@@ -83,11 +83,14 @@ Either you can add them during database creation
 
 or later you can associated after database creation
 1. Navigate to the **Amazon RDS** console.
-2. Select the Oracle RDS instance.
-3. Click **Modify**.
-4. Under **Database options**, select the custom **Parameter Group**.
-5. Under **Option group**, select the custom **Option Group**.
-6. Click **Continue** and **Apply changes**.
+2. Select the Oracle RDS instance (CDB).
+3. Click **Modify**.![image](https://github.com/user-attachments/assets/e00fdab9-af37-4105-92f5-ccbbe4620f73)
+
+4. Under Additional configuration
+5. - **Database options**, select the custom **Parameter Group**.
+6. - **Option group**, select the custom **Option Group**.![image](https://github.com/user-attachments/assets/df24c861-4ca2-407d-8b9d-ed7210506f23)
+
+7. Click **Continue** and next screen review the change and click **Modify DB instance**.
 
 ### Using AWS CLI
 ```sh
