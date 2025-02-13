@@ -13,3 +13,25 @@ We have added the security group inbound rule from OMS IP address "sg-db01" on p
 Please work with your network admin to configure the connectivity between OMS host and RDS Oracle instance for port 1529 (RDS Oracle) and port 3872 for OEM_AGENT and try the installation again. 
 AWS Document for your reference: 
   ++ https://aws.amazon.com/blogs/database/monitor-amazon-rds-for-oracle-instances-using-oracle-enterprise-manager/
+
+
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Oracle.Options.OEMAgent.html#Oracle.Options.OEMAgent.Using
+
+
+select username, account_status from dba_users where username like '%DBSNMP%'
+
+alter user rdsdbsnmp account unlock
+
+alter user rdsdbsnmp identified by CHUMKI#Golam123;
+
+select username, account_status, profile from dba_users where username='RDSDBSNMP'
+
+         
+exec rdsadmin.rdsadmin_util.reset_oem_agent_password('CHUMKI#Golam123');
+
+SELECT rdsadmin.rdsadmin_oem_agent_tasks.restart_oem_agent as TASK_ID from DUAL;
+SELECT rdsadmin.rdsadmin_oem_agent_tasks.get_status_oem_agent() as TASK_ID from DUAL; 
+
+SELECT rdsadmin.rdsadmin_oem_agent_tasks.list_targets_oem_agent as TASK_ID from DUAL;
+
+SELECT text FROM table(rdsadmin.rds_file_util.read_text_file('BDUMP','dbtask-1739412924563-1270.log'));
