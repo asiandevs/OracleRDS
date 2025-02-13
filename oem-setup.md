@@ -15,3 +15,6 @@ We have added the security group inbound rule from OMS IP address "sg-XXX" on po
 Please work with your network admin to configure the connectivity between OMS host and RDS Oracle instance for port 1521 (RDS Oracle) and port 3872 for OEM_AGENT and try the installation again. 
 AWS Document for your reference: 
   ++ https://aws.amazon.com/blogs/database/monitor-amazon-rds-for-oracle-instances-using-oracle-enterprise-manager/ 
+
+
+<img width="787" alt="image" src="https://github.com/user-attachments/assets/ecdf6b3f-a94f-487e-a6e3-642d278c7be0" />
