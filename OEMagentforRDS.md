@@ -7,8 +7,17 @@ Ncat: Connected to <OMS HOST IP> :4903.
 Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
 
 4. Create an inbound rule for the security group of your RDS for Oracle instance for the OMS port and OMS host IP as the source.
-5.  Make sure the OEM Agent version you pick is compatible with the OMS version you have installed. For more information, refer to Accessing the Enterprise Manager Certification Matrix.
-6. OEM Agent is supported for Standard Edition 2 and Enterprise Edition of Amazon RDS for Oracle. Refer to Using the Management Agent for further details related to supported editions and versions.
+5. RDS :
+Type 		Protocol 	Port range  	Source
+Custom TCP 	 TCP		3872		 Custom		     10.11.34.110/32
+Custom TCP   TCP        1529         Custom          10.11.34.110/32
+
+Where 10.11.34.110 is OMS server IP
+
+![image](https://github.com/user-attachments/assets/fcefc860-6a78-418c-8b6b-f06a3702bb04)
+
+6.  Make sure the OEM Agent version you pick is compatible with the OMS version you have installed. For more information, refer to Accessing the Enterprise Manager Certification Matrix.
+7. OEM Agent is supported for Standard Edition 2 and Enterprise Edition of Amazon RDS for Oracle. Refer to Using the Management Agent for further details related to supported editions and versions.
 
 We have added the security group inbound rule from OMS IP address "sg-db01" on port 4903. However, OEM_AGENT installation fails with the below error:
 
