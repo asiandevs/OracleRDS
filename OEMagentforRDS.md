@@ -170,4 +170,5 @@ In this post, we covered how to enable and configure the OEM Agent for Amazon RD
 **References**  
 - [Oracle Documentation](https://docs.oracle.com)  
 - [AWS RDS for Oracle Documentation](https://docs.aws.amazon.com)
+- [Agent Guide](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Oracle.Options.OEMAgent.html)
 
