@@ -140,6 +140,12 @@ If the OEM Agent installation fails, check the **Logs & Events** tab on the Amaz
 
 Refer to the [troubleshooting guide](https://docs.aws.amazon.com) for more details.
 
+```
+SELECT rdsadmin.rdsadmin_oem_agent_tasks.get_status_oem_agent() as TASK_ID from DUAL;   
+```
+```
+SELECT text FROM table(rdsadmin.rds_file_util.read_text_file('BDUMP','dbtask-1740965836354-2.log'));
+```
 ---
 
 ## Modifying or Deleting the OEM Agent Configuration
