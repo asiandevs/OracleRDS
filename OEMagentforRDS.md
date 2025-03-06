@@ -117,6 +117,22 @@ Open OEM, navigate to:
 
    ![Enter Details](https://github.com/user-attachments/assets/9bed1030-7348-4576-aa4c-f230f2b819b2)
 
+```
+Target Name	QAUS
+Database System	qat-cdb
+ 
+Name
+Value
+ 	
+Monitoring Username	dbsnmp
+Monitoring Password	******
+Role	NORMAL
+Oracle Home Path	/rdsdbbin/oracle
+Listener Machine Name	<<DB endpoint>>
+Port	<<DB Listener Port>>
+Connection Protocol	TCP
+Database SID	<DB Name>
+```
 ## Step 5: Final Configuration  
 
 ```sql
