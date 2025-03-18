@@ -220,3 +220,73 @@ Rather than the AWS-provided name, we want it to be short and simple to remember
 If you have your Route53 hosted zone, it will be as simple as:
 
 Create a CNAME record and point it to the DNS name of your RDS instance [How to make custom DNS for RDS instance? ]
+
+
+FSx
+====
+integrating FSx mount point and creating an oracle directory on top if it for your ETL purpose
+
+Natively we cant integrate FSx and RDS oracle as there is no option group available.
+===============
+Replication steps:-
+===============
+1) Created an RDS oracle instance of same version- ' 19.0.0.0.ru-2025-01.rur-2025-01.r1'
+2) Created an FSx file system.
+3) Created an EC2 (amazon linux) instance to communicate between RDS and FSx.
+4) Created a new directory and mounted the FSX filesystem to that directory.
+
+mkdir -p /bharath
+
+ec2-user@ip-172-xx-1-xxx ~]$ df -h
+Filesystem                                               Size  Used Avail Use% Mounted on
+devtmpfs                                                 4.0M     0  4.0M   0% /dev
+tmpfs                                                    475M     0  475M   0% /dev/shm
+tmpfs                                                    190M  448K  190M   1% /run
+/dev/xvda1                                               8.0G  1.9G  6.2G  23% /
+tmpfs                                                    475M     0  475M   0% /tmp
+/dev/xvda128                                              10M  1.3M  8.7M  13% /boot/efi
+fs-xxxxxxxxxxxx.amazonaws.com:/fsx/   64G   54M   64G   1% /bharath
+tmpfs                                                     95M     0   95M   0% /run/user/1000
+
+5) Installed Oracle client in the EC2 instance and connected to the RDS instance .
+
+ec2-user@ip-172-31-1-182 ~]$ sqlplus admin@database-2.xxxxxxxxxx.rds.amazonaws.com:1521/ABCDE
+
+SQL*Plus: Release 21.0.0.0.0 - Production on Tue Mar 18 07:54:10 2025
+Version 21.9.0.0.0
+
+Copyright (c) 1982, 2022, Oracle.  All rights reserved.
+
+Enter password: 
+Last Successful login time: Tue Mar 18 2025 07:53:39 +00:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.26.0.0.0
+
+6) When tried to create an Oracle directory using the OS level FSx filesystem directory, it throws an error as mentioned below.
+
+SQL> create directory test as '/bharath';
+create directory test as '/bharath'
+*
+ERROR at line 1:
+ORA-04088: error during execution of trigger 'RDSADMIN.RDS_DDL_TRIGGER2'
+ORA-00604: error occurred at recursive SQL level 1
+ORA-20900: Invalid path used for directory: /bharath
+ORA-06512: at "RDSADMIN.RDSADMIN_TRIGGER_UTIL", line 714
+ORA-06512: at line 1
+ORA-06512: at line 12
+-------------------------------
+
+==========
+Conclusion:-
+==========
+=> As discussed initially, as RDS is an managed service, if anything need to be done/required OS level activity those will be provided as part of option group. All those integration through option group provided necessary OS level permission by providing a predefined oracle stored procedure and functions. Thus whenever you are trying to create directory using EFS integration, the predefined procedure/function have access to underlying OS filesystem.
+
+=> However, in FSx we need to manually create a oracle directory by mentioning the OS level (FSX mount) directory. And while doing so, the predefined RDS trigger is denying us due to  security reasons.
+
+ORA-04088: error during execution of trigger 'RDSADMIN.RDS_DDL_TRIGGER2'
+ORA-20900: Invalid path used for directory: /bharath
+
+=> So it is always recommended to use either S3 or EFS for additional export/import/ETL process.
+
