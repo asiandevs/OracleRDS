@@ -221,6 +221,42 @@ If you have your Route53 hosted zone, it will be as simple as:
 
 Create a CNAME record and point it to the DNS name of your RDS instance [How to make custom DNS for RDS instance? ]
 
+---------
+
+• Allowing inbound connections to the RDS instance
+• Enabling outbound connections from the replication instance
+
+Subsequent Error: After resolving the timeout issue, we observed the following error: "ORA-12514: TNS:listener does not currently know of service requested in connect descriptor OCI connection failure."
+
+Error
+====
+Test Endpoint failed: Application-Status: 1020912, Application-Message: Log Miner is not supported in Oracle PDB environment Endpoint initialization failed.
+
+Kindly correct me if I am mistaken with the understanding. 
+———
+
+Please allow me to share that above error is observed due to a limitation with Oracle database as source for DMS. 
+
+As per the limitation “Oracle LogMiner doesn't support connections to a pluggable database (PDB). To connect to a PDB, access the redo logs using Binary Reader.”
+[+]https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html#CHAP_Source.Oracle.Limitations 
+
+To use Binary Reader to access the redo logs, add the following extra connection attributes on the endpoint   
+useLogMinerReader=N;useBfile=Y;
+
+The steps for adding extra connection attributes are as follows:
+
+1. Open the AWS DMS console, and then select the AWS Region that the endpoint is in.
+2. From the navigation pane, choose Endpoints, and then select the endpoint that you want to modify.
+3. Choose Actions, and then choose Modify.
+4. Expand the Endpoint settings section, and then select the checkbox for “Use endpoint connection attributes”.
+5. Under “Extra connection attributes” heading add “useLogMinerReader=N;useBfile=Y;”
+6. Choose Save.
+
+[+]How can I add or modify endpoint settings for AWS DMS endpoints?
+https://repost.aws/knowledge-center/dms-extra-connection-attributes 
+
+---------------
+
 
 FSx
 ====
