@@ -165,7 +165,141 @@ ORA-06512: at "RDSADMIN.RDSADMIN_TRIGGER_UTIL", line 714
 ORA-06512: at line 1
 ORA-06512: at line 12
 ```
+-- Solution
+```
 
+With the output shared, I could see that the path '/oracle/gatewaymm' dont have writer access 'w'. So could you please provide write access to the absolute path of the directory and try again?
+
+Current setup:-
+------------------
+[oracle@ip-10-16-144-167 oracle]$ ls -ld /oracle
+drwxr-xr-x 3 oracle oracle 6144 Mar 20 03:16 /oracle
+[oracle@ip-10-16-144-167 oracle]$ ls -ld /oracle/gatewaymm
+drwxr-xr-x 3 oracle oracle 6144 Mar 20 22:03 /oracle/gatewaymm
+
+Action need to be performed:-
+-------------------------------------
+chmod 777 /oracle
+chmod 777 /oracle/gatewaymm
+cd /oracle/gatewaymm
+chmod 777 *
+
+After this you should be able to see the 'w' in the permissions
+"drwxrwxrwx" instead of "drwxr-xr-x"
+```
+===================
+Replication step:-
+===================
+
+1) Mounting the EFS and Creating necessary directories on EC2.
+
+sudo mkdir -p /efsdir
+sudo mount -t efs -o tls fs-0ed404ff2374e6534:/ /efsdir
+
+[ec2-user@ip-172-31-1-11 ~]$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        4.0M     0  4.0M   0% /dev
+tmpfs           475M     0  475M   0% /dev/shm
+tmpfs           190M  516K  190M   1% /run
+/dev/xvda1      8.0G  1.6G  6.4G  21% /
+tmpfs           475M     0  475M   0% /tmp
+/dev/xvda128     10M  1.3M  8.7M  13% /boot/efi
+tmpfs            95M     0   95M   0% /run/user/1000
+127.0.0.1:/     8.0E     0  8.0E   0% /efsdir
+
+sudo mkdir /efsdir/datapump --> Creating directory for storing files to create an external table.
+
+2) Checking OS level permissions:
+
+[ec2-user@ip-172-31-1-11 datapump]$ ls -ld /efsdir/datapump
+drwxrwxrwx. 3 root root 6144 Mar 20 15:00 /efsdir/datapump
+
+
+3) Creating a dummy txt file:
+
+echo -e 10, Boston\\n20, Denver\\n30, Toronto > /efsdir/datapump/basketball_teams.txt
+
+[ec2-user@ip-172-31-1-11 datapump]$ pwd
+/efsdir/datapump
+[ec2-user@ip-172-31-1-11 datapump]$ ls -ltrh
+total 28K
+-rwxrwxrwx. 1 ec2-user ec2-user   34 Mar 20 14:44 basketball_teams.txt
+
+4) Connecting to the RDS Oracle using sqlplus to create oracle directory:
+
+BEGIN
+    rdsadmin.rdsadmin_util.create_directory_efs(
+    p_directory_name => 'DATAUPLOAD1',
+    p_path_on_efs => '/rdsefs-fs-0ed404ff2374e6534/datapump');
+END;
+/
+
+set pages 999 lines 999;
+col DIRECTORY_PATH format a50;
+col DIRECTORY_NAME format a30;
+col owner format a20;
+select * from dba_directories;SQL> SQL> SQL> SQL> 
+
+OWNER		     DIRECTORY_NAME		    DIRECTORY_PATH				       ORIGIN_CON_ID
+-------------------- ------------------------------ -------------------------------------------------- -------------
+SYS		     OPATCH_INST_DIR		    /rdsdbbin/oracle/OPatch					   0
+SYS		     RDS$TEMP			    /rdsdbdata/tmp						   0
+SYS		     DATAUPLOAD1		    /rdsefs-fs-0ed404ff2374e6534/datapump			   0
+SYS		     JAVA$JOX$CUJS$DIRECTORY$	    /rdsdbbin/oracle/javavm/admin/				   0
+SYS		     DATA_PUMP_DIR		    /rdsdbdata/datapump 					   0
+SYS		     ADUMP			    /rdsdbdata/admin/ORCL/adump 				   0
+SYS		     RDS$DB_TASKS		    /rdsdbdata/dbtasks						   0
+SYS		     OPATCH_SCRIPT_DIR		    /rdsdbbin/oracle/QOpatch					   0
+SYS		     OPATCH_LOG_DIR		    /rdsdbbin/oracle/rdbms/log					   0
+SYS		     BDUMP			    /rdsdbdata/log/trace					   0
+
+
+col FILENAME format a20;
+SELECT * FROM TABLE(rdsadmin.rds_file_util.listdir(p_directory => 'DATAUPLOAD1'));
+
+FILENAME	     TYPE	  FILESIZE MTIME
+-------------------- ---------- ---------- ---------
+datapump/	     directory	      6144 20-MAR-25
+basketball_teams.txt file		34 20-MAR-25
+
+Note: Yes this step is working for me while replciating.
+
+
+5) Creating a external table with the dummy text file:
+
+CREATE TABLE basketball_teams (
+  id         NUMBER,
+  team_name  VARCHAR2(50)
+ )
+ORGANIZATION EXTERNAL (
+  TYPE ORACLE_LOADER
+  DEFAULT DIRECTORY DATAUPLOAD1
+  ACCESS PARAMETERS (
+    RECORDS DELIMITED BY NEWLINE
+    DNFS_DISABLE
+    FIELDS TERMINATED BY ','
+    MISSING FIELD VALUES ARE NULL
+    (id,team_name)
+  )
+  LOCATION ('basketball_teams.txt')
+)
+PARALLEL
+REJECT LIMIT UNLIMITED;  
+
+Table created. 
+
+SQL> select * from basketball_teams;
+
+	ID TEAM_NAME
+---------- -----------------
+	10  Boston
+	20  Denver
+	30  Toronto
+
+==========================
+It is working as expected.
+==========================
+```
 - Conclusion: as RDS is an managed service, if anything need to be done/required OS level activity those will be provided as part of option group. All those integration through option group provided necessary OS level permission by providing a predefined oracle stored procedure and functions. Thus whenever you are trying to create directory using EFS integration, the predefined procedure/function have access to underlying OS filesystem.
 
 - So it is always recommended to use either S3 or EFS for additional export/import/ETL process.
