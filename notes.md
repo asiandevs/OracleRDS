@@ -295,7 +295,15 @@ SQL> select * from basketball_teams;
 	10  Boston
 	20  Denver
 	30  Toronto
-
+ 
+```
+Created EC2 instance 
+Created RDS Oracle instance 
+Created EFS filesystem 
+Configured security group settings between EC2 and EFS 
+Created Option group for EFS and Integrated with RDS 
+Configured security group setting between RDS and EFS
+```
 ==========================
 It is working as expected.
 ==========================
