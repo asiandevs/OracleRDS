@@ -141,3 +141,7 @@ and click on 'Create on-demand backup'.
 
 
 Validate Job:
+
+Notification setup:
+aws backup put-backup-vault-notifications --backup-vault-name Oracle-NonProduction-BackupVault --sns-topic-arn arn:aws:sns:ap-southeast-2:977099011956:Database-Backup-nonproduction-Status --backup-vault-events BACKUP_JOB_COMPLETED RESTORE_JOB_COMPLETED
+
