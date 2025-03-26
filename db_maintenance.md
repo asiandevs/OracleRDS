@@ -334,6 +334,10 @@ EXEC rdsadmin.rdsadmin_util.checkpoint;
 ```
 EXEC rdsadmin.rdsadmin_util.switch_logfile;
 ```
+### For a different user than the rdsadmin, grant system privileges
+```
+GRANT EXECUTE ON rdsadmin.rdsadmin_util TO DB_DEVELOPER;
+```
 ### View REDOLOG switches per hour:
 ```sql
 SELECT to_char(first_time,'YYYY-MON-DD') day, 
