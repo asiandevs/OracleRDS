@@ -77,6 +77,18 @@ begin
 rdsadmin.rdsadmin_util.grant_sys_object( p_obj_name => ‘V_$SESSION', p_grantee => 'USERNAME', p_privilege => 'SELECT');
 end; /
 ```
+```
+BEGIN
+  rdsadmin.rdsadmin_util.grant_sys_object(
+    p_obj_name  => 'DBMS_STANDARD',         -- Note: just AUD$, not SYS.AUD$
+    p_grantee   => 'DB_TEST',     -- Replace with actual username
+    p_privilege => 'EXECUTE',
+    p_grant_option => FALSE        -- Add this parameter
+  );
+END;
+/
+```
+
 ### Grant Permission on SYS Tables/Views with the grant option
 ```sql
 EXEC rdsadmin.rdsadmin_util.grant_sys_object(p_obj_name  => 'V_$SESSION', p_grantee => 'USER1', p_privilege => 'SELECT', p_grant_option => true);
@@ -584,4 +596,9 @@ BEGIN
     attribute => 'repeat_interval',
     value     => 'freq=daily;byday=FRI,SAT;byhour=20;byminute=0;bysecond=0');
 END;
+```
+#### Flash shared pool
+```
+exec rdsadmin.rdsadmin_util.flush_shared_pool
+/
 ```
