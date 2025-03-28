@@ -85,7 +85,9 @@ EXEC rdsadmin.rdsadmin_util.reset_oem_agent_password('HUYTFV$%gytre');
 SELECT rdsadmin.rdsadmin_oem_agent_tasks.restart_oem_agent AS TASK_ID 
 FROM DUAL;
 ```
-
+```sql
+SELECT rdsadmin.rdsadmin_oem_agent_tasks.get_status_oem_agent() as TASK_ID from DUAL; 
+```
 ## Collect Task ID and Check Status  
 
 ```sql
