@@ -308,6 +308,86 @@ Configured security group setting between RDS and EFS
 It is working as expected.
 ==========================
 ```
+```
+Title: "Maximizing Audit Log Retention in Amazon RDS for Oracle: A Comprehensive Guide" 
+
+By default, Amazon RDS maintains audit files for just seven days – a limitation that can be challenging for organizations requiring longer retention periods for compliance or security purposes. In this blog post, let's explore how to effectively manage and extend your RDS Oracle audit log retention using Amazon CloudWatch Logs. 
+
+Understanding the Basics:
+
+The default 7-day retention period for audit files cannot be modified directly on the RDS instance
+
+Audit files and trace files share the same retention configuration
+
+After seven days, Amazon RDS automatically deletes older audit files
+
+The CloudWatch Solution 
+
+To retain audit logs beyond the 7-day limit, Amazon CloudWatch Logs offers an excellent solution. Here's why it's beneficial:
+
+Highly durable storage
+
+Advanced analysis capabilities
+
+Custom alarm creation
+
+Metric visualization
+
+Flexible retention periods
+
+Implementation Process:
+
+Configure your RDS for Oracle instance to publish log data to CloudWatch Logs
+
+Each Oracle database log is published as a separate stream in the format:
+/aws/rds/instance/my_instance/audit
+
+Configuring Audit Trails 
+
+Set the audit_trail parameter to one of these values:
+
+none
+
+os
+
+db [, extended]
+
+xml [, extended]
+
+Important Considerations 
+
+CloudWatch Logs Retention:
+
+By default, logs are stored indefinitely
+
+Retention periods can be customized as needed
+
+Modification can be done through CloudWatch Logs console
+
+Archivelog Retention:
+
+Default value is 0 (immediate purging after creation)
+
+Doesn't affect Point-in-Time Recovery capabilities
+
+RDS maintains archived redo logs externally based on backup retention period
+
+Best Practices 
+
+Regularly review and adjust retention periods based on compliance requirements
+
+Monitor CloudWatch Logs storage costs
+
+Implement appropriate log analysis strategies
+
+Maintain documentation of retention configurations
+
+This solution provides organizations with the flexibility to maintain audit logs for extended periods while leveraging CloudWatch's powerful analysis capabilities. 
+
+For detailed implementation steps and additional information, refer to AWS's official documentation on Oracle log access and CloudWatch Logs management.
+
+Remember: Proper audit log management is crucial for maintaining security compliance and ensuring operational transparency in your database environment.
+```
 - Conclusion: as RDS is an managed service, if anything need to be done/required OS level activity those will be provided as part of option group. All those integration through option group provided necessary OS level permission by providing a predefined oracle stored procedure and functions. Thus whenever you are trying to create directory using EFS integration, the predefined procedure/function have access to underlying OS filesystem.
 
 - So it is always recommended to use either S3 or EFS for additional export/import/ETL process.
