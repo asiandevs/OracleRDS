@@ -387,6 +387,22 @@ This solution provides organizations with the flexibility to maintain audit logs
 For detailed implementation steps and additional information, refer to AWS's official documentation on Oracle log access and CloudWatch Logs management.
 
 Remember: Proper audit log management is crucial for maintaining security compliance and ensuring operational transparency in your database environment.
+
+ You can refer the following documentation to enable exporting the logs to CloudWatch,
+ 	[+] https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.Oracle.html#USER_LogAccess.Oracle.PublishtoCloudWatchLogs 
+
+
+Please note that by default CloudWatch logs are stored indefinitely, however you can modify the retention period of this log group by referring the following documentation,
+ 	[+] Change log data retention in CloudWatch Logs - https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention 
+
+
+Archivelog log retention specifies the duration in hours before archive/redo log files are automatically deleted. As for the archive log retention hours, I would like to inform you that the default value would be 0 and this indicates that the archive logs are purged after their creation, however this will not have any impact on your Point In time restores as when the archived log retention period expires, RDS for Oracle removes the archived redo logs from your DB instance. To support restoring your DB instance to a point in time, Amazon RDS retains the archived redo logs outside of your DB instance based on the backup retention period.  
+
+
+You can read more on archive log retention from the following documentation, 
+	[+] https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.Oracle.CommonDBATasks.RetainRedoLogs.html 
+
+ 
 ```
 - Conclusion: as RDS is an managed service, if anything need to be done/required OS level activity those will be provided as part of option group. All those integration through option group provided necessary OS level permission by providing a predefined oracle stored procedure and functions. Thus whenever you are trying to create directory using EFS integration, the predefined procedure/function have access to underlying OS filesystem.
 
