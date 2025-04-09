@@ -108,6 +108,12 @@ impdp \"/ as sysdba\" full=y DIRECTORY=dp_dir DUMPFILE=exp_db01_md.dmp SQLFILE=D
 impdp \"/ as sysdba\" full=y DIRECTORY=dp_dir DUMPFILE=exp_db01_md.dmp SQLFILE=D1AUS_ROLES.sql INCLUDE=ROLE
 impdp \"/ as sysdba\" full=y DIRECTORY=dp_dir DUMPFILE=exp_db01_md.dmp SQLFILE=D1AUS_USERS.sql INCLUDE=USER
 
+
+expdp \"/ as sysdba\" FLASHBACK_TIME=\"TO_TIMESTAMP\(TO_CHAR\(SYSDATE,\'YYYY-MM-DD HH24:MI:SS\'\),\'YYYY-MM-DD HH24:MI:SS\'\)\" directory=dp_dir full=y dumpfile=DEM.dmp logfile=EAYM.log compression=all 
+Note: While importing you need not to mention the flashback option.
+impdp \'/ as sysdba\' directory=DATAPUMP_DIR dumpfile=full_DB.dmp logfile=impfull_db.log full=y 
+
+
 Create tablespace scripts from the source database
 Connect to the source database and create database tablespace, temporary tablespaces and users tablespace quota
 Amazon RDS only supports Oracle Managed Files (OMF) for data files, log files, and control files. When you create data files and log files, you can't specify the physical file names. Oracle RDS provided tablespaces are bigfile tablespaces by default. After connecting to the PDB, all are bigfile tablespaces excluding the TEMP tablespace.
