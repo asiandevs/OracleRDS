@@ -342,3 +342,86 @@ to diable audit poicy
  NOAUDIT POLICY <<audit policy name>>;
 To drop audit policy 
  DROP audit policy <<audit policy name>>;
+
+
+
+ By default, Amazon RDS maintains audit files for just seven days – a limitation that can be challenging for organizations requiring longer retention periods for compliance or security purposes. In this blog post, let's explore how to effectively manage and extend your RDS Oracle audit log retention using Amazon CloudWatch Logs. 
+
+Understanding the Basics:
+
+The default 7-day retention period for audit files cannot be modified directly on the RDS instance
+
+Audit files and trace files share the same retention configuration
+
+After seven days, Amazon RDS automatically deletes older audit files
+
+The CloudWatch Solution 
+
+To retain audit logs beyond the 7-day limit, Amazon CloudWatch Logs offers an excellent solution. Here's why it's beneficial:
+
+Highly durable storage
+
+Advanced analysis capabilities
+
+Custom alarm creation
+
+Metric visualization
+
+Flexible retention periods
+
+Implementation Process:
+
+Configure your RDS for Oracle instance to publish log data to CloudWatch Logs
+
+Each Oracle database log is published as a separate stream in the format:
+/aws/rds/instance/my_instance/audit
+
+Configuring Audit Trails 
+
+Set the audit_trail parameter to one of these values:
+
+none
+
+os
+
+db [, extended]
+
+xml [, extended]
+
+Important Considerations 
+
+CloudWatch Logs Retention:
+
+By default, logs are stored indefinitely
+
+Retention periods can be customized as needed
+
+Modification can be done through CloudWatch Logs console
+
+Best Practices 
+
+Regularly review and adjust retention periods based on compliance requirements
+
+Monitor CloudWatch Logs storage costs
+
+Implement appropriate log analysis strategies
+
+Maintain documentation of retention configurations
+
+This solution provides organizations with the flexibility to maintain audit logs for extended periods while leveraging CloudWatch's powerful analysis capabilities. 
+
+For detailed implementation steps and additional information, refer to AWS's official documentation on Oracle log access and CloudWatch Logs management.
+
+Export Audit table
+
+All audit data (including AUD$ table) can be exported with Data Pump using a parfile similar to the next one:
+
+https://support.oracle.com/epmos/faces/DocumentDisplay?parent=SrDetailText&sourceId=3-40295847021&id=2709550.1
+
+
+
+userid='system/<password>'
+directory= ...
+full=yes
+include=audit_trails
+dumpfile=audit.dmp
