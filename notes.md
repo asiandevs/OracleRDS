@@ -408,4 +408,15 @@ You can read more on archive log retention from the following documentation, 
 
 - So it is always recommended to use either S3 or EFS for additional export/import/ETL process.
 
-
+---
+```
+set pagesize 3000
+set lines 2000
+set head off
+set feedback off
+spool user_backups.sql
+select 'alter user '||username||' profile '||profile||';' from dba_users;
+select 'alter user '|| name ||' identified by values '''||decode(spare4,null,password,spare4)||''';' sql 
+from sys.user$ 
+where name in ('SVC_WS_AUDIT', 'UNDERWRITER');
+```
