@@ -1,427 +1,248 @@
-AWS Cloud Migration
-/
-Fine-grained Auditing (Production database - JANGLA)
+```markdown
+# AWS Cloud Migration – Fine-Grained Auditing 
 
+##  Overview
 
-Owned by Monowar Mukul
+Fine-Grained Auditing (FGA) allows administrators to audit access to specific data based on conditions. This feature is essential for monitoring sensitive data and high-risk actions while reducing the volume of logs by focusing only on relevant events.
 
-Last updated: just a moment ago
+## Amazon RDS and Oracle FGA
 
-Fine-Grained Auditing (FGA) allows administrators to audit access to specific data based on conditions. This feature is essential for monitoring sensitive data and high-risk actions, reducing the volume of logs by focusing only on relevant events.
+Amazon RDS for Oracle supports the Oracle Fine-Grained Auditing (FGA) feature.  
+However, FGA events stored in `SYS.FGA_LOG$` and accessed via `DBA_FGA_AUDIT_TRAIL` are **not** accessible through standard RDS log access.
 
-Amazon RDS for Oracle database log files - Amazon Relational Database Service The Oracle audit files provided are the standard Oracle auditing files. Amazon RDS supports the Oracle fine-grained auditing (FGA) feature. However, log access doesn't provide access to FGA events that are stored in the SYS.FGA_LOG$ table and that are accessible through the DBA_FGA_AUDIT_TRAIL view.
+Reference: [Security Auditing in Amazon RDS for Oracle: Part 1](https://aws.amazon.com/blogs/database/part-1-security-auditing-in-amazon-rds-for-oracle/)
 
-Security auditing in Amazon RDS for Oracle: Part 1 | Amazon Web Services 
+##  Required RDS Configuration
 
-In RDS : make sure custom parameter group has 
-audit_sys_operation=TRUE and 
+Ensure your RDS Oracle instance uses a custom parameter group with the following settings:
 
-audit trail=DB
+```sql
+audit_sys_operations = TRUE
+audit_trail = DB
+```
 
+> **Note**: Audit is database-level
 
-Audit is database level
+---
 
+##  Audit Configuration – Pluggable/tenant Database (e.g., JANGLA  is a pluggable database here)
 
+```sql
 SQL> alter session set container=JANGLA;
-Session altered.
-SQL> show parameter audit
-NAME                                 TYPE        VALUE
------------------------------------- ----------- ------------------------------
-audit_file_dest                      string      /u01/app/oracle/admin/CHUMKI/
-                                                 adump
-audit_sys_operations                 boolean     TRUE
-audit_syslog_level                   string
-audit_trail                          string      DB
-unified_audit_common_systemlog       string
-unified_audit_sga_queue_size         integer     1048576
-unified_audit_systemlog              string      LOCAL3.INFO
+SQL> show parameter audit;
+```
+
+Example output:
+
+| Name | Type | Value |
+|------|------|-------|
+| audit_file_dest | string | /u01/app/oracle/admin/CHUMKI/adump |
+| audit_sys_operations | boolean | TRUE |
+| audit_trail | string | DB |
+| unified_audit_systemlog | string | LOCAL3.INFO |
+
+---
+
+##  FGA Policy Names
+
+```sql
 SQL> select distinct FGA_POLICY_NAME from UNIFIED_AUDIT_TRAIL;
-FGA_POLICY_NAME
---------------------------------------------------------------------------------
- 
+```
 
-FGA_POLICY_NAME
+FGA_POLICY_NAME appears under the default owner and default tablespace.
 
-It is under default owner and default tablespace
+---
 
+##  Audit Table Partitioning
 
+```sql
+select owner, table_name, interval, partitioning_type, partition_count, def_tablespace_name 
+from dba_part_tables where owner='AUDSYS';
+```
 
--- on-premise n-premise 
-SQL> select owner,table_name,interval,partitioning_type,partition_count,def_tablespace_name from dba_part_Tables where owner='AUDSYS';
-OWNER      TABLE_NAME      INTERVAL             PARTITION PARTITION_COUNT DEF_TABLESPACE_NAME
----------- --------------- -------------------- --------- --------------- ------------------------------
-AUDSYS     AUD$UNIFIED     INTERVAL '1' MONTH   RANGE             1048575 SYSAUX
- 
+### Output:
 
+| OWNER | TABLE_NAME | INTERVAL | PARTITION | COUNT | DEF_TABLESPACE_NAME |
+|-------|------------|----------|-----------|-------|---------------------|
+| AUDSYS | AUD$UNIFIED | INTERVAL '1' MONTH | RANGE | 1048575 | SYSAUX |
 
+---
 
-RDS : 
-OWNER      TABLE_NAME    INTERVAL                PARTITION PARTITION_COUNT DEF_TABLESPACE_NAME
---------- --------------- ------------------------------
-AUDSYS     AUD$UNIFIED   INTERVAL '1' MONTH     RANGE             1048575 SYSAUX
-Fine-gained auditing is enabled
+## Fine-Grained Auditing Capability
 
+```sql
+select * from v$option where lower(parameter) like '%audit%' order by 1;
+```
 
+| PARAMETER | VALUE | CON_ID |
+|-----------|-------|--------|
+| Fine-grained Auditing | TRUE | 0 |
+| Unified Auditing | FALSE | 0 |
 
--- on-premise
--- on-premise
-SQL> select * from v$option where lower(parameter) like '%audit%' order by 1;
-PARAMETER                      VALUE                              CON_ID
------------------------------- ------------------------------ ----------
-Fine-grained Auditing          TRUE                                    0
-Unified Auditing               FALSE                                   0
+---
 
+## List Enabled Audit Policies
 
-RDS:
-PARAMETER                                                        VALUE                                                                CON_ID
----------------------------------------------------------------- ---------------------------------------------------------------- ----------
-Fine-grained Auditing                                            TRUE                                                                      0
-Unified Auditing                                                 FALSE                                                                     0
-Unified Auditing Policies
-
-
-
--- on-premise
--- on-premise
-COLUMN POLICY_NAME     FORMAT A30                                 
-COLUMN ENABLED_OPTION  FORMAT A20                                 
-COLUMN ENTITY_NAME     FORMAT A35                                 
-COLUMN ENTITY_TYPE     FORMAT A10                                 
-COLUMN SUCCESS FORMAT A10  
-set pages 200
-set lines 2000
+```sql
 SELECT * 
 FROM audit_unified_enabled_policies 
-order by policy_name,entity_name;
-~
-POLICY_NAME                    ENABLED_OPTION       ENTITY_NAME                         ENTITY_TYP SUCCESS    FAI
------------------------------- -------------------- ----------------------------------- ---------- ---------- ---
+ORDER BY policy_name, entity_name;
+```
 
+### Distinct Policies:
 
+```sql
+select distinct policy_name from audit_unified_enabled_policies;
+```
 
----list the distinct policies in on-premise system
-select distinct policy_name
-from audit_unified_enabled_policies;
-AUD_POL_ANY_SCHEMA_DDL
-AUD_POL_SCHEMA_DDL
-ORA_ACCOUNT_MGMT
-ORA_SECURECONFIG
-Most of them are Oracle Default schemas related. There are four policies other than oracle default schemas as below : 
+- AUD_POL_ANY_SCHEMA_DDL  
+- AUD_POL_SCHEMA_DDL  
+- ORA_ACCOUNT_MGMT  
+- ORA_SECURECONFIG  
 
-RDS
+---
 
+##  Create Policies on RDS
 
----create one by one in RDS
-----CREATE POLICY AUD_POL_ANY_SCHEMA_DDL;
-create audit policy "AUD_POL_ANY_SCHEMA_DDL" privileges create any cluster,
-                                                        alter any cluster,
-                                                        drop any cluster,
-                                                        create any index,
-                                                        alter any index,
-                                                        drop any index,
-                                                        create any synonym,
-                                                        drop any synonym,
-                                                        create any view,
-                                                        drop any view,
-                                                        create any sequence,
-                                                        alter any sequence,
-                                                        drop any sequence,
-                                                        drop any role,
-                                                        alter any role,
-                                                        create any trigger,
-                                                        alter any trigger,
-                                                        drop any trigger,
-                                                        create any materialized view,
-                                                        alter any materialized view,
-                                                        drop any materialized view,
-                                                        create any directory,
-                                                        drop any directory,
-                                                        create any type,
-                                                        alter any type,
-                                                        drop any type,
-                                                        create any indextype,
-                                                        alter any indextype,
-                                                        drop any indextype,
-                                                        create any context,
-                                                        drop any context,
-                                                        create any rule set,
-                                                        alter any rule set,
-                                                        drop any rule set,
-                                                        create any rule,
-                                                        alter any rule,
-                                                        drop any rule,
-                                                        drop any sql profile,
-                                                        alter any sql profile,
-                                                        create any sql profile,
-                                                        drop any sql translation profile;
----Enable audit
-audit policy aud_pol_any_schema_ddl
-    except 'ANONYMOUS',
-'APPQOSSYS',
-'AUDSYS',
-'DBSFWUSER',
-'DBSNMP',
-'DIP',
-'GGSYS',
-'GSMADMIN_INTERNAL',
-'GSMCATUSER',
-'GSMUSER',
-'OUTLN',
-'REMOTE_SCHEDULER_AGENT',
-'SYS',
-'SYS$UMF',
-'SYSBACKUP',
-'SYSDG',
-'SYSKM',
-'SYSRAC',
-'SYSTEM',
-'XDB',
-'XS$NULL';
---validate 
-select *
-  from audit_unified_enabled_policies
- where policy_name = 'AUD_POL_ANY_SCHEMA_DDL';
+### Create `AUD_POL_ANY_SCHEMA_DDL`
 
+```sql
+create audit policy "AUD_POL_ANY_SCHEMA_DDL" privileges ...;
+```
 
----create policy AUD_POL_SCHEMA_DDL
-create audit policy "AUD_POL_SCHEMA_DDL" privileges create table,
-                                                    create synonym,
-                                                    create view,
-                                                    create sequence,
-                                                    create database link,
-                                                    create public database link,
-                                                    drop public database link,
-                                                    create procedure,
-                                                    create trigger,
-                                                    create materialized view,
-                                                    create type,
-                                                    create indextype,
-                                                    create job actions create index,
-                                                                       drop index,
-                                                                       alter index,
-                                                                       drop table,
-                                                                       alter sequence,
-                                                                       alter table,
-                                                                       drop sequence,
-                                                                       drop synonym,
-                                                                       drop view,
-                                                                       alter procedure,
-                                                                       alter trigger,
-                                                                       drop trigger,
-                                                                       drop procedure,
-                                                                       drop type,
-                                                                       alter type,
-                                                                       create type body,
-                                                                       alter type body,
-                                                                       drop type body,
-                                                                       alter view,
-                                                                       create function,
-                                                                       alter function,
-                                                                       drop function,
-                                                                       create package,
-                                                                       alter package,
-                                                                       drop package,
-                                                                       create package body,
-                                                                       alter package body,
-                                                                       drop package body,
-                                                                       drop indextype,
-                                                                       alter indextype,
-                                                                       alter synonym;
----Enable audit for the policy AUD_POL_SCHEMA_DDL
-audit policy aud_pol_schema_ddl
-    except 
-'ANONYMOUS',
-'APPQOSSYS',
-'AUDSYS',
-'DBSFWUSER',
-'DBSNMP',
-'DIP',
-'GGSYS',
-'GSMADMIN_INTERNAL',
-'GSMCATUSER',
-'GSMUSER',
-'OUTLN',
-'REMOTE_SCHEDULER_AGENT',
-'SYS$UMF',
-'SYS',
-'SYSBACKUP',
-'SYSDG',
-'SYSKM',
-'SYSRAC',
-'SYSTEM',
-'XDB',
-'XS$NULL';
---validate 
-select *
-  from audit_unified_enabled_policies
- where policy_name = 'AUD_POL_SCHEMA_DDL';
-/
+(Include all relevant privileges listed in original document.)
 
+**Enable Policy:**
 
-RDS: Below two policies created by default. We need to enable ORA_SECURECONFIG with EXCEPT option as default is ALL USERS but on-premise has with EXCEPT option.
-POLICY_NAME                    ENABLED_OPTION       ENTITY_NAME                         ENTITY_TYP SUCCESS    FAI
------------------------------- -------------------- ----------------------------------- ---------- ---------- ---
-ORA_LOGON_FAILURES             BY USER              ALL USERS                           USER       NO         YES
-ORA_SECURECONFIG               BY USER              ALL USERS                           USER       YES        YES
+```sql
+audit policy aud_pol_any_schema_ddl except '<LIST_OF_USERS>';
+```
 
+### Create `AUD_POL_SCHEMA_DDL`
 
---Enable Audit for the policy ORA_ACCOUNT_MGMT
-audit policy ORA_ACCOUNT_MGMT
-    except 
-'ANONYMOUS',
-'APPQOSSYS',
-'AUDSYS',
-'DBSFWUSER',
-'DBSNMP',
-'DIP',
-'GGSYS',
-'GSMADMIN_INTERNAL',
-'GSMCATUSER',
-'GSMUSER',
-'OUTLN',
-'REMOTE_SCHEDULER_AGENT',
-'SYS$UMF',
-'SYS',
-'SYSBACKUP',
-'SYSDG',
-'SYSKM',
-'SYSRAC',
-'SYSTEM',
-'XDB';
---validate 
-select *
-  from audit_unified_enabled_policies
- where policy_name = 'ORA_ACCOUNT_MGMT';
+```sql
+create audit policy "AUD_POL_SCHEMA_DDL" privileges ...;
+```
 
+**Enable Policy:**
 
---disable the audit which is configured for all the users
+```sql
+audit policy aud_pol_schema_ddl except '<LIST_OF_USERS>';
+```
+
+---
+
+##  Default RDS Policies
+
+RDS includes:
+
+- ORA_LOGON_FAILURES (All Users)
+- ORA_SECURECONFIG (All Users)
+
+Update ORA_SECURECONFIG to use `EXCEPT` clause:
+
+```sql
 NOAUDIT policy ORA_SECURECONFIG;
----Enable audit for the policy ORA_SECURECONFIG
-audit policy ORA_SECURECONFIG
-    except 
-'ANONYMOUS',
-'APPQOSSYS',
-'AUDSYS',
-'DBSFWUSER',
-'DBSNMP',
-'DIP',
-'GGSYS',
-'GSMADMIN_INTERNAL',
-'GSMCATUSER',
-'GSMUSER',
-'OUTLN',
-'REMOTE_SCHEDULER_AGENT',
-'SYS$UMF',
-'SYS',
-'SYSBACKUP',
-'SYSDG',
-'SYSKM',
-'SYSRAC',
-'SYSTEM';
---validate 
-select *
-  from audit_unified_enabled_policies
- where policy_name = 'ORA_ACCOUNT_MGMT';
- 
+audit policy ORA_SECURECONFIG except '<LIST_OF_USERS>';
+```
+---
 
-Other SQLs to manage Audit (sample SQLs)
+## Enable ORA_ACCOUNT_MGMT
 
+```sql
+audit policy ORA_ACCOUNT_MGMT except '<LIST_OF_USERS>';
+```
 
+---
 
----list the distinct policies in on-premise system
-select distinct policy_name
-  from audit_unified_enabled_policies;
-AUD_POL_ANY_SCHEMA_DDL
-AUD_POL_SCHEMA_DDL
-ORA_ACCOUNT_MGMT
-ORA_SECURECONFIG
---to get the ddl use the below 
-SELECT to_char(dbms_metadata.get_ddl('AUDIT_POLICY', 'audit policy name'))
-FROM dual;
-to diable audit poicy
- NOAUDIT POLICY <<audit policy name>>;
-To drop audit policy 
- DROP audit policy <<audit policy name>>;
+## Other Audit SQL Utilities
 
+### List Policies
 
+```sql
+select distinct policy_name from audit_unified_enabled_policies;
+```
 
- By default, Amazon RDS maintains audit files for just seven days – a limitation that can be challenging for organizations requiring longer retention periods for compliance or security purposes. In this blog post, let's explore how to effectively manage and extend your RDS Oracle audit log retention using Amazon CloudWatch Logs. 
+### Generate DDL for Policy
 
-Understanding the Basics:
+```sql
+SELECT to_char(dbms_metadata.get_ddl('AUDIT_POLICY', '<policy_name>')) FROM dual;
+```
 
-The default 7-day retention period for audit files cannot be modified directly on the RDS instance
+### Disable Audit Policy
 
-Audit files and trace files share the same retention configuration
+```sql
+NOAUDIT POLICY <policy_name>;
+```
 
-After seven days, Amazon RDS automatically deletes older audit files
+### Drop Audit Policy
 
-The CloudWatch Solution 
+```sql
+DROP audit policy <policy_name>;
+```
 
-To retain audit logs beyond the 7-day limit, Amazon CloudWatch Logs offers an excellent solution. Here's why it's beneficial:
+---
 
-Highly durable storage
+## CloudWatch Integration for Extended Log Retention
 
-Advanced analysis capabilities
+### Default Retention Limitation
 
-Custom alarm creation
+- RDS audit logs retained only for **7 days**
+- Cannot be extended on instance directly
+- Audit & trace files share the same retention config
 
-Metric visualization
+---
 
-Flexible retention periods
+### CloudWatch Logs Solution
 
-Implementation Process:
+**Benefits:**
 
-Configure your RDS for Oracle instance to publish log data to CloudWatch Logs
+- Durable storage
+- Log analytics
+- Alerts & metrics
+- Customizable retention
 
-Each Oracle database log is published as a separate stream in the format:
-/aws/rds/instance/my_instance/audit
+**Implementation:**
 
-Configuring Audit Trails 
+- Configure Oracle RDS to publish logs to CloudWatch
+- Logs stream format: `/aws/rds/instance/my_instance/audit`
 
-Set the audit_trail parameter to one of these values:
+---
 
-none
+### Audit Trail Configuration
 
-os
+Set `audit_trail` to one of:
 
-db [, extended]
+- none
+- os
+- db [, extended]
+- xml [, extended]
 
-xml [, extended]
+---
 
-Important Considerations 
+### Best Practices
 
-CloudWatch Logs Retention:
+- Adjust retention per compliance needs
+- Monitor storage costs
+- Implement log analysis strategy
+- Document configurations
 
-By default, logs are stored indefinitely
+---
 
-Retention periods can be customized as needed
+##  Exporting Audit Data
 
-Modification can be done through CloudWatch Logs console
+To export audit tables using **Data Pump**:
 
-Best Practices 
-
-Regularly review and adjust retention periods based on compliance requirements
-
-Monitor CloudWatch Logs storage costs
-
-Implement appropriate log analysis strategies
-
-Maintain documentation of retention configurations
-
-This solution provides organizations with the flexibility to maintain audit logs for extended periods while leveraging CloudWatch's powerful analysis capabilities. 
-
-For detailed implementation steps and additional information, refer to AWS's official documentation on Oracle log access and CloudWatch Logs management.
-
-Export Audit table
-
-All audit data (including AUD$ table) can be exported with Data Pump using a parfile similar to the next one:
-
-https://support.oracle.com/epmos/faces/DocumentDisplay?parent=SrDetailText&sourceId=3-40295847021&id=2709550.1
-
-
-
+```bash
 userid='system/<password>'
-directory= ...
+directory=...
 full=yes
 include=audit_trails
 dumpfile=audit.dmp
+```
+
+Reference: [Oracle Support Doc ID 2709550.1](https://support.oracle.com/epmos/faces/DocumentDisplay?parent=SrDetailText&sourceId=3-40295847021&id=2709550.1)
+
+---
+
+
