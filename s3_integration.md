@@ -42,10 +42,15 @@ Below is a step-by-step guide to configuring S3 integration using the `S3_INTEGR
 1. In the **Amazon RDS console**, go to **Databases**.
 2. Choose your Oracle **DB instance**.
 3. Navigate to the **Connectivity & security** tab.
+![image](https://github.com/user-attachments/assets/5bf50770-a4f2-4aa4-a688-181907905ea5)
+
 4. Click **Manage IAM roles**.
 5. Under **Add IAM role to this instance**:
    - Select the IAM role: `RDS_S3_Integration_Role`.
    - For **Feature**, choose `S3_INTEGRATION`.
+![image](https://github.com/user-attachments/assets/62079a7d-a340-4c31-b41c-33aec3d74022)
+  
+
 6. Click **Add role**.
 
 ---
