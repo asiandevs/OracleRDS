@@ -2,6 +2,11 @@
 
 This repository provides a comprehensive set of configuration and operational guides for working with **Amazon RDS for Oracle**. Each document addresses a specific task, best practice, or integration strategy relevant to managing Oracle databases on AWS.
 
+```diff
+- NOTE
+! please keep in mind that while the information presented here provides a solid foundation, the cloud landscape is dynamic.
+For the most current and accurate details on AWS, Azure, Google Cloud, and Oracle Cloud, we recommend consulting the official documentation and websites of the respective providers.
+```
 ---
 
 ## 📂 Task Index
