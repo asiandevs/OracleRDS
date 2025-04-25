@@ -149,5 +149,3 @@ If you're planning to change the time zone for your Oracle RDS, be sure to **und
 Have any questions or ran into issues with time zone management in RDS? Feel free to reach out—I’m happy to help!
 
 --- 
-
-Let me know if you'd like this post exported to PDF or formatted for a particular CMS or knowledge base!
