@@ -1,30 +1,87 @@
-You reached out to us as you wished to know how to change the retention period for audit files for a longer duration than the default configuration of 7 days as it is not present in the documentation.
+# 📊 How to Extend Audit Log Retention for Amazon RDS for Oracle
 
-Over the chat we discussed on the issue. Further I requested you that I will be taking this offline and perform my investigation on the ask.
+If you're managing Oracle databases on Amazon RDS, you've probably come across a common challenge: **audit logs are only retained for 7 days by default**—and this retention period cannot be changed directly on the RDS instance.
 
-  As you may already know that the default retention period for audit files is seven days. Amazon RDS might delete audit files older than seven days. While the documentation states that Audit files and trace files share the same retention configuration.
+Recently, a customer reached out to us to understand whether it was possible to retain audit logs longer than the default configuration. In this blog post, we'll walk through that question, what we discovered, and how to work around the limitation using **Amazon CloudWatch Logs**.
 
+---
 
- However unfortunately the retention period of audit logs cannot be changed on the RDS Instance and will remain at default period of 7 days. But as you mentioned that you wish to retain the audit logs for a longer period of time then in that case you leverage CloudWatch logs where you can configure your RDS for Oracle DB instance to publish log data to a log group in Amazon CloudWatch Logs. With CloudWatch Logs, you can analyze the log data, and use CloudWatch to create alarms and view metrics. You can use CloudWatch Logs to store your log records in highly durable storage.
+## 🔍 Understanding the Default Audit Log Retention
 
-	> Amazon RDS publishes each Oracle database log as a separate database stream in the log group. For example, if you configure the export function to include the audit log, audit data is stored in an audit log stream in the /aws/rds/instance/my_instance/audit log group.
+By default, Amazon RDS retains **audit files** and **trace files** for **7 days**. After this period, the platform may automatically delete older files. Although this is sufficient for some scenarios, many organizations—especially those with compliance or security requirements—need longer retention windows.
 
+> 🛑 **Important:** The audit log retention period **cannot** be extended or configured directly within RDS.
 
- >> For exporting audit logs you can set the set the audit_trail parameter to any of the following allowed values and based on the parameter value the audit logs get captured and exported to CloudWatch.
+This limitation is not clearly documented, and it has implications for monitoring and forensic activities.
 
-	- { none | os | db [, extended] | xml [, extended] }
+---
 
+## ✅ Workaround: Export Audit Logs to Amazon CloudWatch Logs
 
- You can refer the following documentation to enable exporting the logs to CloudWatch,
- 	[+] https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.Oracle.html#USER_LogAccess.Oracle.PublishtoCloudWatchLogs 
+If you need to retain audit logs for longer than 7 days, your best option is to **export logs to CloudWatch Logs**. This AWS-native monitoring service provides **durable log storage**, advanced **search and visualization**, and supports **custom retention periods**.
 
+### 📥 How It Works
 
-Please note that by default CloudWatch logs are stored indefinitely, however you can modify the retention period of this log group by referring the following documentation,
- 	[+] Change log data retention in CloudWatch Logs - https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention 
+When configured, Amazon RDS can stream Oracle logs—including audit logs—to individual **log groups** in CloudWatch.
 
+For example:
 
-Archivelog log retention specifies the duration in hours before archive/redo log files are automatically deleted. As for the archive log retention hours, I would like to inform you that the default value would be 0 and this indicates that the archive logs are purged after their creation, however this will not have any impact on your Point In time restores as when the archived log retention period expires, RDS for Oracle removes the archived redo logs from your DB instance. To support restoring your DB instance to a point in time, Amazon RDS retains the archived redo logs outside of your DB instance based on the backup retention period.  
+```
+/aws/rds/instance/my_instance/audit
+```
 
+This stream will contain your audit trail logs, safely stored and available for extended retention.
 
-You can read more on archive log retention from the following documentation, 
-	[+] https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.Oracle.CommonDBATasks.RetainRedoLogs.html 
+---
+
+## ⚙️ Setting It Up
+
+To enable audit log export, you need to adjust the `audit_trail` parameter. Valid values include:
+
+```
+none | os | db [, extended] | xml [, extended]
+```
+
+After setting this parameter, follow AWS documentation to publish the logs:
+
+🔗 [Export RDS Oracle Logs to CloudWatch](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.Oracle.html#USER_LogAccess.Oracle.PublishtoCloudWatchLogs)
+
+Once enabled, RDS begins streaming log data automatically to the appropriate CloudWatch log group.
+
+---
+
+## 📆 Configuring Retention in CloudWatch Logs
+
+By default, **CloudWatch logs are retained indefinitely**, which is great for long-term compliance. However, if needed, you can customize the retention period per log group.
+
+Here’s how:
+
+🔗 [Set Log Retention in CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention)
+
+This gives you full control over how long you store each type of log.
+
+---
+
+## 🧱 A Note on Archive Logs and PITR
+
+In addition to audit logs, Oracle on RDS generates **archived redo logs**, which are crucial for **Point-in-Time Recovery (PITR)**.
+
+- The **archive log retention** default is `0` hours.
+- This means archived logs are purged soon after creation.
+- **However**, PITR remains unaffected. Amazon RDS keeps the necessary logs **outside the instance**, based on your **backup retention settings**.
+
+📘 [More on Archive Log Retention](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.Oracle.CommonDBATasks.RetainRedoLogs.html)
+
+---
+
+## 📝 Final Thoughts
+
+While it's unfortunate that the audit log retention period cannot be extended directly within Amazon RDS for Oracle, the workaround using **CloudWatch Logs** is both powerful and flexible. It gives you greater control over log management, longer retention, and integrates well with the broader AWS ecosystem for monitoring and alerting.
+
+If you're looking to ensure compliance, improve observability, or simply keep your audit trail intact for longer, enabling CloudWatch log exports should be your next step.
+
+---
+
+Have questions or want help implementing this setup? Drop a comment below or reach out!
+
+---
