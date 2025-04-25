@@ -3,11 +3,17 @@
 
 The **Multi-AZ** feature of Amazon RDS automatically provisions and maintains a **synchronous standby replica** in a different Availability Zone. Since data is replicated in real-time, the **Recovery Point Objective (RPO)** is effectively **0**.
 
+![image](https://github.com/user-attachments/assets/64c6723f-d379-494b-8734-59f11af22630)
+
+
 ## Convert to Multi-AZ DB instance deployment
 
 Select the database 
 click on Actions
 Then click "Convert to Multi-AZ deployment"
+
+![image](https://github.com/user-attachments/assets/0b5cdfb3-7c06-411a-9e2f-4f679d15637a)
+
 
 There are two options to Schedule database modification
 1) Apply during the next scheduled maintenance window
@@ -16,11 +22,16 @@ Current maintenance window:
 The modifications in this request and any pending modifications will be asynchronously applied as soon as possible, regardless of the maintenance window setting for this database instance.
 
 select the option and click on Convert to Multi-AZ
+![image](https://github.com/user-attachments/assets/01fa2515-53f6-4481-a2bc-b8fd0671194f)
+
 
 # Validate 
 
 Select the database
 click on Configuration section and validate Multi-AZ [ yes ] on Instance class section
+
+![image](https://github.com/user-attachments/assets/e172a51b-ea07-4b9d-af97-278fcff5c73f)
+
 
 ## Create a standby database
 - Select the database instance and click on Modify
