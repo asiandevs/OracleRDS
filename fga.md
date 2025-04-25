@@ -1,4 +1,3 @@
-```markdown
 # AWS Cloud Migration – Fine-Grained Auditing 
 
 ##  Overview
@@ -242,6 +241,7 @@ dumpfile=audit.dmp
 ```
 
 Reference: [Oracle Support Doc ID 2709550.1](https://support.oracle.com/epmos/faces/DocumentDisplay?parent=SrDetailText&sourceId=3-40295847021&id=2709550.1)
+**Require Oracle Support Account**
 
 ---
 
