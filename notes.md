@@ -23,25 +23,25 @@ SELECT name FROM v$services;
 
 ---
 
-## 🚫 2. Unsupported Oracle Features on RDS
+##  2. Unsupported Oracle Features on RDS
 
-### ❌ Not Supported:
+###  Not Supported:
 - **Oracle RAC (Real Application Clusters)**
 - **Transportable Tablespaces**
 - **Direct access to RMAN OS commands**
 - **Advanced queuing and fine-grained auditing**
 
-**📌 Why it matters**: Many enterprise workloads depend on RAC or Transportable Tablespaces for high availability and data mobility—both of which are not available on RDS.
+** Why it matters**: Many enterprise workloads depend on RAC or Transportable Tablespaces for high availability and data mobility—both of which are not available on RDS.
 
-**💡 Alternative**: If RAC or custom OS-level backup/recovery processes are critical, AWS recommends using Oracle on EC2 for full control.
+** Alternative**: If RAC or custom OS-level backup/recovery processes are critical, AWS recommends using Oracle on EC2 for full control.
 
 ---
 
-## 🔐 3. In-Transit Encryption (TLS)
+##  3. In-Transit Encryption (TLS)
 
 RDS supports TLS connections, but the setup differs from typical on-prem configurations.
 
-### 🧪 Validation Queries:
+###  Validation Queries:
 To verify if your session is encrypted:
 ```sql
 SELECT network_service_banner FROM v$session_connect_info WHERE sid = SYS_CONTEXT('USERENV', 'SID');
@@ -49,35 +49,35 @@ SELECT network_service_banner FROM v$session_connect_info WHERE sid = SYS_CONTEX
 
 Look for the string `TCP/IP with SSL` in the result.
 
-**📘 Reference**: [Using SSL with Oracle on RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Oracle.Concepts.SSL.html)
+** Reference**: [Using SSL with Oracle on RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Oracle.Concepts.SSL.html)
 
 ---
 
-## 🚫 4. Oracle RAC Is Not Available
+##  4. Oracle RAC Is Not Available
 
-### ⚠️ Impact:
+###  Impact:
 Oracle RAC is a staple in high-availability architectures—but it's not supported on RDS. This can be a deal-breaker for mission-critical, tightly coupled applications expecting cross-AZ failover.
 
-**🛠 Workaround**: Use Multi-AZ deployments in RDS (standby replica) or migrate to Oracle on EC2 for full RAC capabilities.
+**Workaround**: Use Multi-AZ deployments in RDS (standby replica) or migrate to Oracle on EC2 for full RAC capabilities.
 
 ---
 
-## ❌ 5. Read Replicas Are Not Supported
+##  5. Read Replicas Are Not Supported
 
 Unlike PostgreSQL or MySQL, **RDS for Oracle does not support read replicas**.
 
-### 🔄 Options:
+###  Options:
 - **Use Oracle Active Data Guard** (available in Enterprise Edition with additional license costs)
 - **Set up AWS DMS** (Database Migration Service) for near real-time replication to another RDS instance
 - **Consider AWS Aurora (PostgreSQL-compatible)** if read scaling is a top priority
 
 ---
 
-## 🧰 6. RDS Parameter Group Incompatibilities
+##  6. RDS Parameter Group Incompatibilities
 
 Certain advanced Oracle parameters are restricted or read-only in RDS.
 
-### 🛑 Example:
+###  Example:
 - `UTL_FILE_DIR` cannot be set directly
 - `*.db_recovery_file_dest_size` might have limits
 
@@ -85,11 +85,11 @@ Certain advanced Oracle parameters are restricted or read-only in RDS.
 
 ---
 
-## 📂 7. External Directory Access with FSx and EFS
+##  7. External Directory Access with FSx and EFS
 
 RDS doesn’t allow arbitrary OS-level directory access (e.g., for logs or UTL_FILE), but AWS provides partial workarounds.
 
-### 📦 Workaround Options:
+###  Workaround Options:
 - Mount **Amazon FSx or EFS** on an **EC2 jump box**
 - Use the `rdsadmin.rds_file_util` package for file manipulation within the RDS-managed environment
 
@@ -100,11 +100,11 @@ SELECT * FROM TABLE(rdsadmin.rds_file_util.listdir('/rdsdbdata/log/'));
 
 ---
 
-## 📜 8. Audit Log Retention Using CloudWatch
+##  8. Audit Log Retention Using CloudWatch
 
 Audit logs in RDS for Oracle are stored locally and periodically flushed. Over time, older logs are deleted.
 
-### ✅ Best Practice:
+###  Best Practice:
 - **Enable export to CloudWatch Logs** for persistent, centralized audit logging.
 - Configure log retention in CloudWatch via log group settings (e.g., keep logs for 30 days).
 
@@ -114,7 +114,7 @@ Audit logs in RDS for Oracle are stored locally and periodically flushed. Over t
 
 ---
 
-## ✅ Final Thoughts
+##  Final Thoughts
 
 While Amazon RDS for Oracle offers great convenience and automation, it comes with trade-offs. Understanding these constraints up front can save countless hours of troubleshooting and prevent architectural mismatches down the line.
 
@@ -122,6 +122,4 @@ For workloads requiring fine-tuned Oracle configurations, RAC, or advanced repli
 
 ---
 
-### 💬 Have questions or want to share your experience with RDS for Oracle? Drop a comment or connect with me — always happy to chat architecture.
 
----
