@@ -44,6 +44,15 @@ This repository aims to help engineers and database administrators:
 If you have enhancements or corrections to any task, feel free to raise an issue or submit a pull request.
 
 ---
+##  Need Help?
+
+I hope the above information helps you streamline your Oracle RDS refresh strategy across AWS accounts. If you have questions or need assistance implementing this, feel free to reach out. I'm available for a discussion and can schedule a Chime meeting based on your availability.
+
+> 🕐 I'm based in the **Australian Eastern Timezone (AEDT)** and available **08:00 AM to 04:00 PM** for meetings.
+
+Let’s make your RDS refresh process automated, secure, and production-grade!
+
+--- 
 
 ##  License
 
