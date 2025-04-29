@@ -1,4 +1,4 @@
-# 🔄 Automating Oracle RDS Refreshes Across AWS Accounts
+#  Automating Oracle RDS Refreshes Across AWS Accounts
 
 Refreshing an Amazon RDS Oracle database from a production account to a non-production account can be a time-consuming and error-prone manual task. Fortunately, AWS offers a variety of native services and third-party solutions to **automate cross-account database refreshes** with ease and security.
 
@@ -6,11 +6,11 @@ In this blog post, we’ll explore **two main options** to achieve this—using 
 
 ---
 
-## 📌 Option 1: Native AWS Services (Lambda, Step Functions, EventBridge)
+##  Option 1: Native AWS Services (Lambda, Step Functions, EventBridge)
 
 Automating the refresh of an Oracle RDS database between AWS accounts involves orchestrating snapshot creation, cross-account sharing, and restoration in a target account.
 
-### 🔧 High-Level Steps
+###  High-Level Steps
 
 #### 1. Set Up AWS Backup  
 - Enable **automated backups** for your Oracle RDS instance in the **source account**.  
@@ -35,7 +35,7 @@ Automating the refresh of an Oracle RDS database between AWS accounts involves o
 - Use **AWS KMS** for snapshot encryption.  
 - Share encryption keys across accounts to permit secure snapshot access.
 
-### 🧩 Reference Solutions
+###  Reference Solutions
 
 Check out the following detailed guides from AWS:
 
@@ -44,11 +44,11 @@ Check out the following detailed guides from AWS:
 
 ---
 
-## 🛠️ Option 2: Use a Marketplace Solution – CirrusHQ
+##  Option 2: Use a Marketplace Solution – CirrusHQ
 
 If you're looking for a **ready-to-use, plug-and-play solution**, the **Aurora and RDS Automated Database Refresh** tool by **CirrusHQ** on AWS Marketplace offers exactly that.
 
-### 🌟 Key Features:
+###  Key Features:
 - Automates snapshot copy, re-encryption, restore, and cleanup
 - Zero impact on production systems
 - Built on **Infrastructure as Code (IaC)** using CloudFormation and CodePipeline
@@ -59,16 +59,16 @@ If you're looking for a **ready-to-use, plug-and-play solution**, the **Aurora a
 
 ---
 
-## 📚 Additional Resources
+##  Additional Resources
 
-### 📑 Guides:
+###  Guides:
 - **Steps of a database refresh:**  
   [Orchestrating database refreshes for Amazon RDS and Aurora](https://aws.amazon.com/blogs/database/orchestrating-database-refreshes-for-amazon-rds-and-amazon-aurora/)
 
 - **Code templates for automation:**  
   [Configuring your database refresh](https://aws.amazon.com/blogs/database/orchestrating-database-refreshes-for-amazon-rds-and-amazon-aurora/)
 
-### 📦 GitHub Repository:
+###  GitHub Repository:
 AWS provides a reference implementation including:
 - CloudFormation templates
 - Lambda function code
@@ -77,13 +77,3 @@ AWS provides a reference implementation including:
 🔗 [Database Refresh Orchestrator for RDS & Aurora (GitHub)](https://github.com/aws-samples/database-refresh-orchestrator-for-amazon-rds-and-amazon-aurora)
 
 ---
-
-## 📞 Need Help?
-
-I hope the above information helps you streamline your Oracle RDS refresh strategy across AWS accounts. If you have questions or need assistance implementing this, feel free to reach out. I'm available for a discussion and can schedule a Chime meeting based on your availability.
-
-> 🕐 I'm based in the **Australian Eastern Timezone (AEDT)** and available **08:00 AM to 04:00 PM** for meetings.
-
-Let’s make your RDS refresh process automated, secure, and production-grade!
-
---- 
