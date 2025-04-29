@@ -1,4 +1,4 @@
-# 📋 Oracle PDB to AWS RDS Migration Runbook
+#  Oracle PDB to AWS RDS Migration Runbook
 
 ---
 
