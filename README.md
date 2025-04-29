@@ -41,7 +41,8 @@ This repository aims to help engineers and database administrators:
 
 ##  Contributions
 
-If you have enhancements or corrections to any task, feel free to raise an issue or submit a pull request.
+###  If you have enhancements or corrections to any task, feel free to raise an issue or submit a pull request.
+###  Have questions or want to share your experience with RDS for Oracle? Drop a comment or connect with me — always happy to chat architecture.
 
 ---
 ##  Need Help?
