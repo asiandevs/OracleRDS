@@ -1,4 +1,4 @@
-# 🔐 Automating Oracle RDS Backups with AWS Backup and KMS
+#  Automating Oracle RDS Backups with AWS Backup and KMS
 
 Data protection and recovery are crucial for maintaining business continuity, meeting regulatory requirements, and ensuring operational resilience. **AWS Backup** offers a centralized, fully managed solution to automate and scale your data backup operations across AWS services, including Amazon RDS.
 
@@ -6,7 +6,7 @@ In this blog post, we'll walk through how to configure AWS Backup for Oracle RDS
 
 ---
 
-## 🛡️ Why Use AWS Backup?
+##  Why Use AWS Backup?
 
 **AWS Backup** is a policy-driven service that simplifies and automates backup management at scale. It’s particularly valuable for:
 
@@ -16,7 +16,7 @@ In this blog post, we'll walk through how to configure AWS Backup for Oracle RDS
 
 ---
 
-## 📌 Architecture Overview
+##  Architecture Overview
 
 The setup involves:
 
@@ -29,16 +29,16 @@ The setup involves:
 
 ---
 
-## 🔑 Step 1: Create a KMS Key
+##  Step 1: Create a KMS Key
 
 A **KMS key** is used to encrypt your backup data at rest, ensuring its privacy and integrity.
 
-### ✅ Benefits:
+###  Benefits:
 - Secure **encryption at rest**
 - Centralized key control and auditability
 - Support for **compliance standards**
 
-### 🛠️ How to Create:
+###  How to Create:
 1. Go to **AWS Management Console → Key Management Service (KMS)**
 2. Click **Create key**
 3. Select the key type and configure settings
@@ -49,16 +49,16 @@ A **KMS key** is used to encrypt your backup data at rest, ensuring its privacy 
 
 ---
 
-## 💾 Step 2: Create a Backup Vault
+##  Step 2: Create a Backup Vault
 
 A **Backup Vault** is a logical container that securely stores backups and allows tagging, access control, and encryption settings.
 
-### ✅ Benefits:
+###  Benefits:
 - Centralized storage for backup data
 - Fine-grained access control
 - Compliance with retention policies
 
-### 🛠️ How to Create:
+###  How to Create:
 1. Go to **AWS Backup → Vaults → Create Vault**
 2. Specify:
    - **Vault name**
@@ -68,7 +68,7 @@ A **Backup Vault** is a logical container that securely stores backups and allow
 
 ---
 
-## 📆 Step 3: Configure a Backup Plan
+##  Step 3: Configure a Backup Plan
 
 A **Backup Plan** defines:
 - Backup frequency (daily, weekly, etc.)
@@ -76,7 +76,7 @@ A **Backup Plan** defines:
 - Lifecycle settings (cold storage transition)
 - Target resources (RDS, EC2, etc.)
 
-### 🛠️ To create a backup plan:
+###  To create a backup plan:
 1. Go to **AWS Backup → Backup Plans**
 2. Click **Create Backup Plan**
 3. Use **Build a new plan** option
@@ -88,11 +88,11 @@ A **Backup Plan** defines:
 
 ---
 
-## ⚡ Step 4: Create an On-Demand Backup
+##  Step 4: Create an On-Demand Backup
 
 You can create ad-hoc backups using the **on-demand** feature.
 
-### 🛠️ How to Do It:
+###  How to Do It:
 1. Open **AWS Backup Console**
 2. Go to **Dashboard → Create on-demand backup**
 3. Select:
@@ -107,17 +107,17 @@ You can create ad-hoc backups using the **on-demand** feature.
 
 ---
 
-## ✅ Step 5: Validate Backup Job
+##  Step 5: Validate Backup Job
 
 Once initiated, monitor the backup status under the **Jobs** section in the AWS Backup console.
 
 ---
 
-## 📣 Optional: Set Up SNS Notifications
+##  Optional: Set Up SNS Notifications
 
 Receive notifications when backup and restore jobs complete using **Amazon SNS**.
 
-### 🛠️ Configure Notifications via CLI:
+###  Configure Notifications via CLI:
 
 ```bash
 aws backup put-backup-vault-notifications \
@@ -126,7 +126,7 @@ aws backup put-backup-vault-notifications \
   --backup-vault-events BACKUP_JOB_COMPLETED RESTORE_JOB_COMPLETED
 ```
 
-### 🔍 Verify Configuration:
+###  Verify Configuration:
 
 ```bash
 aws backup get-backup-vault-notifications \
@@ -149,7 +149,7 @@ aws backup get-backup-vault-notifications \
 
 ---
 
-## 🎯 Final Thoughts
+##  Final Thoughts
 
 **AWS Backup** offers a powerful, secure, and automated way to protect your **Amazon RDS for Oracle** databases. By combining backup policies, vaults, and KMS encryption, you can meet compliance needs while minimizing manual effort.
 
@@ -157,7 +157,7 @@ Whether you’re looking for regulatory compliance, centralized backup control, 
 
 ---
 
-### 📚 Useful Resources:
+###  Useful Resources:
 
 - 🔗 [AWS Backup Documentation](https://docs.aws.amazon.com/backup/)
 - 🔗 [AWS KMS Documentation](https://docs.aws.amazon.com/kms/latest/developerguide/)
