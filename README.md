@@ -1,4 +1,4 @@
-# 📘 Oracle RDS on AWS – Task Reference Guide
+#  Oracle RDS on AWS – Task Reference Guide
 
 This repository provides a comprehensive set of configuration and operational guides for working with **Amazon RDS for Oracle**. Each document addresses a specific task, best practice, or integration strategy relevant to managing Oracle databases on AWS.
 
@@ -9,7 +9,7 @@ For the most current and accurate details on AWS, Azure, Google Cloud, and Oracl
 ```
 ---
 
-## 📂 Task Index
+##  Task Index
 
 | Task | Description | Reference |
 |------|-------------|-----------|
@@ -27,7 +27,7 @@ For the most current and accurate details on AWS, Azure, Google Cloud, and Oracl
 
 ---
 
-## 🏗️ Repository Purpose
+##  Repository Purpose
 
 This repository aims to help engineers and database administrators:
 - Accelerate Oracle RDS provisioning and automation
@@ -35,17 +35,17 @@ This repository aims to help engineers and database administrators:
 - Enhance audit, backup, and integration capabilities
 - Improve disaster recovery readiness
 
-> 🔒 All configurations adhere to AWS best practices and Oracle licensing constraints.
+>  All configurations adhere to AWS best practices and Oracle licensing constraints.
 
 ---
 
-## 📬 Contributions
+##  Contributions
 
 If you have enhancements or corrections to any task, feel free to raise an issue or submit a pull request.
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License.
 
