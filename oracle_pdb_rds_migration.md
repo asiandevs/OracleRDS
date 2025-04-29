@@ -168,43 +168,8 @@ Awesome — here's a simple **ASCII-style architecture diagram** showing the com
 
 ---
 
-```
-                                        +----------------+
-                                        |   Client (User) |
-                                        |  (WinSCP/FileZilla) 
-                                        +--------+-------+
-                                                 |
-                                                 | (SFTP Upload)
-                                                 v
-                                        +----------------+
-                                        | AWS SFTP Server |
-                                        | (Transfer Family)|
-                                        +--------+-------+
-                                                 |
-                                                 | (Linked to S3 Bucket)
-                                                 v
-                                       +-----------------+
-                                       |     S3 Bucket    |
-                                       +--------+---------+
-                                                |
-                                                | (S3 Copy via EC2)
-                                                v
-+----------------+           Mount via NFS     +-----------------+
-|     EC2        |---------------------------->|       EFS       |
-| (SessionMgr)   |                              | (Elastic FS)    |
-| - expdp/impdp  |                              +--------+--------+
-| - AWS CLI      |                                       |
-| - Oracle tools |                                       |
-+----------------+                                       |
-             |                                            |
-             | Oracle Datapump (expdp/impdp)               |
-             v                                            |
-+---------------------------------------------------------+
-|                     RDS Oracle                          |
-| - External Directory (EFS linked)                       |
-| - Target Pluggable Database (PDB)                       |
-+---------------------------------------------------------+
-```
+![image](https://github.com/user-attachments/assets/317a53be-e5c7-4ac5-bf56-d9b8cffe4401)
+
 
 ---
 
