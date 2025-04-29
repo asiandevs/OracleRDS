@@ -6,7 +6,7 @@ Below is a step-by-step guide to configuring S3 integration using the `S3_INTEGR
 
 ---
 
-## 🧩 Step 1: Add `S3_INTEGRATION` to Your Option Group
+##  Step 1: Add `S3_INTEGRATION` to Your Option Group
 
 1. Open the **Amazon RDS console**.
 2. In the left navigation pane, choose **Option groups**.
@@ -17,11 +17,11 @@ Below is a step-by-step guide to configuring S3 integration using the `S3_INTEGR
 7. Check **Apply Immediately**.
 8. Click **Add Option**.
 
-> 💡 If your instance isn't associated with an option group, you may need to create one and assign it first.
+>  If your instance isn't associated with an option group, you may need to create one and assign it first.
 
 ---
 
-## 🛡️ Step 2: Create an IAM Role for RDS S3 Integration
+##  Step 2: Create an IAM Role for RDS S3 Integration
 
 1. Open the **IAM console**.
 2. Go to **Roles**, and click **Create role**.
@@ -55,7 +55,7 @@ Below is a step-by-step guide to configuring S3 integration using the `S3_INTEGR
 
 ---
 
-## ✅ Step 4: Validate Integration
+##  Step 4: Validate Integration
 
 To confirm the role has been applied:
 
@@ -72,7 +72,7 @@ You should see a directory such as `DATA_PUMP_DIR` mapped to the appropriate S3 
 
 ---
 
-## 📦 Use Case Examples
+##  Use Case Examples
 
 - **Data Import**:
    ```sql
@@ -98,7 +98,7 @@ You should see a directory such as `DATA_PUMP_DIR` mapped to the appropriate S3 
 
 ---
 
-## 📝 Final Thoughts
+##  Final Thoughts
 
 S3 integration with Amazon RDS for Oracle simplifies data exchange between your database and cloud storage. This is especially useful for:
 
