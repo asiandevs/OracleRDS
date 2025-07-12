@@ -159,7 +159,7 @@ Whether you’re looking for regulatory compliance, centralized backup control, 
 
 ###  Useful Resources:
 
-- 🔗 [AWS Backup Documentation](https://docs.aws.amazon.com/backup/)
+- 🔗 [AWS Backup Documentation](https://docs.aws.amazon.com/prescriptive-guidance/latest/backup-recovery/aws-backup.html)
 - 🔗 [AWS KMS Documentation](https://docs.aws.amazon.com/kms/latest/developerguide/)
 - 🔗 [AWS Backup Vault Notifications](https://docs.aws.amazon.com/cli/latest/reference/backup/put-backup-vault-notifications.html)
 
