@@ -120,8 +120,8 @@ Open OEM, navigate to:
    ![Enter Details](https://github.com/user-attachments/assets/9bed1030-7348-4576-aa4c-f230f2b819b2)
 
 ```
-Target Name	QAUS
-Database System	qat-cdb
+Target Name	<SID>
+Database System	<DBSYSTEM>
  
 Name
 Value
