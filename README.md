@@ -23,7 +23,7 @@ For the most current and accurate details on AWS, Azure, Google Cloud, and Oracl
 | **Amazon RDS Commands** | A practical list of maintenance and administrative SQL commands specific to Amazon RDS for Oracle. | [View Guide ➜](https://github.com/asiandevs/OracleRDS/blob/main/oracle_rds_maintenance_commands.md) |
 | **Fine-Grained Auditing (FGA)** | How to configure and manage FGA policies in Oracle RDS for secure and detailed activity auditing. | [View Guide ➜](https://github.com/asiandevs/OracleRDS/blob/main/fga.md) |
 | **Log Retention** | Manage and extend the retention of audit logs and diagnostic logs in Oracle RDS. | [View Guide ➜](https://github.com/asiandevs/OracleRDS/blob/main/log_retention.md) |
-| **Amazon S3 Integration** | Connect and interact with Amazon S3 from Oracle RDS for external tables, data import/export, and backups. | [View Guide ➜](https://github.com/asiandevs/OracleRDS/blob/main/s3_integration.md) |
+| **Amazon S3 Integration** | Connect and interact with Amazon S3 from Oracle RDS for external tables, data import/export, and backups. | [View Guide ➜](https://github.com/asiandevs/OracleRDS/blob/main/oracle_rds_s3_integration.md) |
 
 ---
 
